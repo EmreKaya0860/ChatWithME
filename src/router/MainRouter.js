@@ -6,6 +6,7 @@ import GetStartedScreen from "../screens/GetStartedScreen";
 import LoginScreen from "../screens/LoginScreen";
 import RegisterScreen from "../screens/RegisterScreen";
 import HomeScreen from "../screens/HomeScreen";
+import ProfileScreen from "../screens/ProfileScreen";
 
 import { auth } from "../services/authentication";
 import { onAuthStateChanged } from "firebase/auth";
@@ -53,6 +54,7 @@ const MainRouter = () => {
         </>
       )}
       <Stack.Screen name="GetStartedScreen" component={GetStartedScreen} />
+      <Stack.Screen name="ProfileScreen" component={ProfileScreen} />
     </Stack.Navigator>
   );
 };
