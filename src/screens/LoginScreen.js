@@ -4,10 +4,10 @@ import {
   View,
   TouchableOpacity,
   TextInput,
+  ActivityIndicator,
 } from "react-native";
 import React, { useState } from "react";
-import { auth } from "../services/authentication";
-import { getAuth, signInWithEmailAndPassword, signOut } from "firebase/auth";
+import { handleLogin } from "../services/authentication";
 
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -15,17 +15,18 @@ const LoginScreen = ({ navigation }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [wrongError, setWrongError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleLogin = () => {
-    signInWithEmailAndPassword(auth, email, password)
-      .then((userCredential) => {
-        console.log(userCredential.user);
-        navigation.navigate("HomeScreen");
-      })
-      .catch((error) => {
-        console.log(error);
-        setWrongError("Email veya şifre hatalı!");
-      });
+  const loginAndNavigate = async () => {
+    setIsLoading(true);
+    const loginResult = await handleLogin(email, password);
+
+    if (loginResult === "Login success") {
+      navigation.navigate("HomeScreen");
+    } else {
+      setWrongError("Email or password is wrong!");
+    }
+    setIsLoading(false);
   };
 
   const handleNavigation = () => {
@@ -47,12 +48,18 @@ const LoginScreen = ({ navigation }) => {
         secureTextEntry
       />
       <Text style={styles.wrongError}>{wrongError}</Text>
-      <TouchableOpacity onPress={handleLogin}>
+      <TouchableOpacity onPress={loginAndNavigate}>
         <Text>Login</Text>
       </TouchableOpacity>
       <TouchableOpacity onPress={handleNavigation}>
         <Text>Do not have account? Register</Text>
       </TouchableOpacity>
+      {isLoading ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#0000ff" />
+          <Text>Yükleniyor...</Text>
+        </View>
+      ) : null}
     </SafeAreaView>
   );
 };
@@ -62,5 +69,10 @@ export default LoginScreen;
 const styles = StyleSheet.create({
   wrongError: {
     color: "red",
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });

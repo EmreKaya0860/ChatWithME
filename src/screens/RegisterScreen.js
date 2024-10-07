@@ -4,10 +4,8 @@ import React, { useState } from "react";
 import { Formik } from "formik";
 import * as Yup from "yup";
 
-import { auth } from "../services/authentication";
-import { createUserWithEmailAndPassword } from "firebase/auth";
-import { db } from "../services/firestore";
-import { addDoc, collection } from "firebase/firestore";
+import { handleRegister } from "../services/authentication";
+import { addData } from "../services/firestore";
 
 const getCurrentDate = () => {
   const today = new Date();
@@ -51,16 +49,10 @@ const RegisterScreen = ({ navigation }) => {
     const { email, password } = userData;
 
     try {
-      // Kayıt işlemini gerçekleştir
-      const userCredential = await createUserWithEmailAndPassword(
-        auth,
-        email,
-        password
-      );
-      const userId = userCredential.user.uid; // Mevcut kullanıcı ID'si
+      const userId = await handleRegister(email, password); // Firebase Authentication'da kullanıcı oluştur
 
       // Kullanıcı verilerini Firestore'a ekle
-      await addDoc(collection(db, "users"), { ...userData, userId });
+      await addData("users", { ...userData, userId });
 
       // Kayıt başarılı, HomeScreen'e yönlendir
       navigation.navigate("HomeScreen");
@@ -136,6 +128,11 @@ const RegisterScreen = ({ navigation }) => {
                   <Text>Email: {userData?.email}</Text>
                   <Text>Ad Soyad: {userData?.displayName}</Text>
                   <Text>Profil Resmi: {userData?.profileImage}</Text>
+                  <Text>
+                    Not: Bilgilerinizi onayladıktan sonra otomatik olarak giriş
+                    yaparak Ana Sayfaya yönlendirileceksiniz. Daha sonra profil
+                    kısmından bilgilerinizi güncelleyebilirsiniz.
+                  </Text>
                   <Button title="Onayla" onPress={handleConfirm} />
                   <Button title="İptal" onPress={handleCancel} />
                 </View>
@@ -166,5 +163,6 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
     borderRadius: 10,
     elevation: 5,
+    gap: 10,
   },
 });
