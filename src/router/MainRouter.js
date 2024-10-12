@@ -46,15 +46,17 @@ const MainRouter = () => {
       }}
     >
       {isUserExist ? (
-        <Stack.Screen name="HomeScreen" component={HomeScreen} />
+        <>
+          <Stack.Screen name="HomeScreen" component={HomeScreen} />
+          <Stack.Screen name="GetStartedScreen" component={GetStartedScreen} />
+          <Stack.Screen name="ProfileScreen" component={ProfileScreen} />
+        </>
       ) : (
         <>
           <Stack.Screen name="LoginScreen" component={LoginScreen} />
           <Stack.Screen name="RegisterScreen" component={RegisterScreen} />
         </>
       )}
-      <Stack.Screen name="GetStartedScreen" component={GetStartedScreen} />
-      <Stack.Screen name="ProfileScreen" component={ProfileScreen} />
     </Stack.Navigator>
   );
 };

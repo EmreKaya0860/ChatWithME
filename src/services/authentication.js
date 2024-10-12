@@ -4,6 +4,11 @@ import {
   initializeAuth,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
+  updateEmail,
+  updatePassword,
+  sendEmailVerification,
+  EmailAuthProvider,
+  reauthenticateWithCredential,
 } from "firebase/auth";
 import ReactNativeAsyncStorage from "@react-native-async-storage/async-storage";
 
@@ -34,5 +39,46 @@ export const handleRegister = async (email, password) => {
     return userCredential.user.uid;
   } catch (error) {
     return "Register failed";
+  }
+};
+
+export const handleUpdateEmail = (user, email) => {
+  updateEmail(user, email)
+    .then(() => {
+      console.log("Email updated successfully!");
+    })
+    .catch((error) => {
+      console.error("Error updating email: ", error);
+    });
+};
+
+export const handleUpdatePassword = (user, password) => {
+  updatePassword(user, password)
+    .then(() => {
+      console.log("Password updated successfully!");
+    })
+    .catch((error) => {
+      console.error("Error updating password: ", error);
+    });
+};
+
+export const verifyEmail = (user) => {
+  sendEmailVerification(user)
+    .then(() => {
+      console.log("Verification email sent!");
+      user.reload();
+      return "Verification email sent!";
+    })
+    .catch((error) => {
+      return error.message;
+    });
+};
+
+export const reauthenticate = async (user, email, password) => {
+  const credential = EmailAuthProvider.credential(email, password);
+  try {
+    await reauthenticateWithCredential(user, credential);
+  } catch (error) {
+    console.error("Error reauthenticating: ", error);
   }
 };
