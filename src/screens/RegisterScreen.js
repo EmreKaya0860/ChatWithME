@@ -9,18 +9,12 @@ import { addData } from "../services/firestore";
 
 import LoadingIndicator from "../Components/LoadingIndicator";
 
-const getCurrentDate = () => {
-  const today = new Date();
-  return today.toISOString().split("T")[0];
-};
-
 const initialValues = {
   email: "",
   password: "",
   displayName: "",
-  profileImage: "",
-  createdAt: getCurrentDate(),
-  updatedAt: getCurrentDate(),
+  createdAt: new Date().toLocaleString(),
+  updatedAt: new Date().toLocaleString(),
 };
 
 const validationSchema = Yup.object().shape({
@@ -34,7 +28,6 @@ const validationSchema = Yup.object().shape({
     .required("Ad Soyad boş geçilemez!")
     .min(2, "Ad Soyad en az 2 karakter olmalıdır!")
     .max(50, "Ad Soyad en fazla 50 karakter olmalıdır!"),
-  profileImage: Yup.string(),
 });
 
 const RegisterScreen = ({ navigation }) => {
@@ -106,15 +99,6 @@ const RegisterScreen = ({ navigation }) => {
             {errors.displayName && (
               <Text style={styles.error}>{errors.displayName}</Text>
             )}
-            <Text>Profil Resmi</Text>
-            <TextInput
-              onChangeText={handleChange("profileImage")}
-              value={values.profileImage}
-              placeholder="Profile Image"
-            />
-            {errors.profileImage && (
-              <Text style={styles.error}>{errors.profileImage}</Text>
-            )}
             <Button onPress={handleSubmit} title="Kayıt Ol" />
             <Modal
               animationType="slide"
@@ -127,7 +111,6 @@ const RegisterScreen = ({ navigation }) => {
                   <Text>Kayıt Bilgileriniz:</Text>
                   <Text>Email: {userData?.email}</Text>
                   <Text>Ad Soyad: {userData?.displayName}</Text>
-                  <Text>Profil Resmi: {userData?.profileImage}</Text>
                   <Text>
                     Not: Bilgilerinizi onayladıktan sonra otomatik olarak giriş
                     yaparak Ana Sayfaya yönlendirileceksiniz. Daha sonra profil

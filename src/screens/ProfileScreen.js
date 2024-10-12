@@ -39,6 +39,7 @@ const ProfileScreen = ({ navigation }) => {
       if (data && data[0]) {
         setUserData(data[0]);
         setOldUserData(data[0]);
+        setEnteredOldPassword(data[0].password);
         setDocumentId(data[1].docId);
       }
       setLoading(false);
@@ -68,6 +69,7 @@ const ProfileScreen = ({ navigation }) => {
       handleUpdatePassword(auth.currentUser, userData.password);
       auth.signOut();
     }
+    userData.updatedAt = new Date().toLocaleString();
     const result = await updateUserData(documentId, userData);
     if (auth.currentUser.email !== userData.email) {
       console.log("Email değişti");
