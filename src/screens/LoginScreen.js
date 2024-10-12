@@ -11,6 +11,8 @@ import { handleLogin } from "../services/authentication";
 
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import LoadingIndicator from "../Components/LoadingIndicator";
+
 const LoginScreen = ({ navigation }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -54,12 +56,7 @@ const LoginScreen = ({ navigation }) => {
       <TouchableOpacity onPress={handleNavigation}>
         <Text>Do not have account? Register</Text>
       </TouchableOpacity>
-      {isLoading ? (
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#0000ff" />
-          <Text>Yükleniyor...</Text>
-        </View>
-      ) : null}
+      {isLoading ? <LoadingIndicator visible={isLoading} /> : null}
     </SafeAreaView>
   );
 };

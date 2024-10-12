@@ -7,6 +7,8 @@ import * as Yup from "yup";
 import { handleRegister } from "../services/authentication";
 import { addData } from "../services/firestore";
 
+import LoadingIndicator from "../Components/LoadingIndicator";
+
 const getCurrentDate = () => {
   const today = new Date();
   return today.toISOString().split("T")[0];
@@ -37,10 +39,10 @@ const validationSchema = Yup.object().shape({
 
 const RegisterScreen = ({ navigation }) => {
   const [modalVisible, setModalVisible] = useState(false);
-  const [userData, setUserData] = useState(null); // Kullanıcı bilgilerini saklamak için
+  const [userData, setUserData] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSignup = (values) => {
-    // Kullanıcı bilgilerini modalda göster
     setUserData(values);
     setModalVisible(true);
   };
@@ -48,15 +50,16 @@ const RegisterScreen = ({ navigation }) => {
   const handleConfirm = async () => {
     const { email, password } = userData;
 
-    try {
-      const userId = await handleRegister(email, password); // Firebase Authentication'da kullanıcı oluştur
+    setIsLoading(true);
 
-      // Kullanıcı verilerini Firestore'a ekle
+    try {
+      const userId = await handleRegister(email, password);
+
       await addData("users", { ...userData, userId });
 
-      // Kayıt başarılı, HomeScreen'e yönlendir
       navigation.navigate("HomeScreen");
-      setModalVisible(false); // Modalı kapat
+      setModalVisible(false);
+      setIsLoading(false);
     } catch (error) {
       console.log(error);
       alert(error.message);
@@ -64,9 +67,8 @@ const RegisterScreen = ({ navigation }) => {
   };
 
   const handleCancel = () => {
-    // Modal iptal edildiğinde, kullanıcı bilgilerini temizle
     setModalVisible(false);
-    setUserData(null); // İstersen kullanıcı bilgilerini sıfırla
+    setUserData(null);
   };
 
   return (
@@ -74,7 +76,7 @@ const RegisterScreen = ({ navigation }) => {
       <Formik
         initialValues={initialValues}
         validationSchema={validationSchema}
-        onSubmit={handleSignup} // Kayıt işlemi modalı açar
+        onSubmit={handleSignup}
       >
         {({ handleChange, handleSubmit, values, errors }) => (
           <View>
@@ -114,8 +116,6 @@ const RegisterScreen = ({ navigation }) => {
               <Text style={styles.error}>{errors.profileImage}</Text>
             )}
             <Button onPress={handleSubmit} title="Kayıt Ol" />
-
-            {/* Modal */}
             <Modal
               animationType="slide"
               transparent={true}
@@ -138,6 +138,7 @@ const RegisterScreen = ({ navigation }) => {
                 </View>
               </View>
             </Modal>
+            <LoadingIndicator visible={isLoading} />
           </View>
         )}
       </Formik>
@@ -155,7 +156,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.5)", // Yarı saydam arka plan
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
   },
   modalContent: {
     width: 300,
