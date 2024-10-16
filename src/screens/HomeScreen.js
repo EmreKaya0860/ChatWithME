@@ -10,6 +10,9 @@ const HomeScreen = ({ navigation }) => {
       <TouchableOpacity onPress={() => navigation.navigate("ProfileScreen")}>
         <Text>Go To Profile</Text>
       </TouchableOpacity>
+      <TouchableOpacity onPress={() => navigation.navigate("FriendsScreen")}>
+        <Text>Friends</Text>
+      </TouchableOpacity>
     </SafeAreaView>
   );
 };

@@ -7,6 +7,8 @@ import LoginScreen from "../screens/LoginScreen";
 import RegisterScreen from "../screens/RegisterScreen";
 import HomeScreen from "../screens/HomeScreen";
 import ProfileScreen from "../screens/ProfileScreen";
+import FriendRequestsScreen from "../screens/FriendRequestsScreen";
+import FriendsScreen from "../screens/FriendsScreen";
 
 import { auth } from "../services/authentication";
 import { onAuthStateChanged } from "firebase/auth";
@@ -50,6 +52,11 @@ const MainRouter = () => {
           <Stack.Screen name="HomeScreen" component={HomeScreen} />
           <Stack.Screen name="GetStartedScreen" component={GetStartedScreen} />
           <Stack.Screen name="ProfileScreen" component={ProfileScreen} />
+          <Stack.Screen
+            name="FriendRequestsScreen"
+            component={FriendRequestsScreen}
+          />
+          <Stack.Screen name="FriendsScreen" component={FriendsScreen} />
         </>
       ) : (
         <>

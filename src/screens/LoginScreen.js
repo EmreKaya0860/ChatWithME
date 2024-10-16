@@ -42,6 +42,7 @@ const LoginScreen = ({ navigation }) => {
       <TextInput
         placeholder="Email"
         onChangeText={(email) => setEmail(email)}
+        inputMode="email"
       />
       <Text>Şifre</Text>
       <TextInput
