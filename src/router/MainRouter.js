@@ -8,6 +8,7 @@ import RegisterScreen from "../screens/RegisterScreen";
 import HomeScreen from "../screens/HomeScreen";
 import ProfileScreen from "../screens/ProfileScreen";
 import FriendRequestsScreen from "../screens/FriendRequestsScreen";
+import FriendsScreen from "../screens/FriendsScreen";
 
 import { auth } from "../services/authentication";
 import { onAuthStateChanged } from "firebase/auth";
@@ -55,6 +56,7 @@ const MainRouter = () => {
             name="FriendRequestsScreen"
             component={FriendRequestsScreen}
           />
+          <Stack.Screen name="FriendsScreen" component={FriendsScreen} />
         </>
       ) : (
         <>

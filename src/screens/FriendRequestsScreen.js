@@ -5,28 +5,61 @@ import {
   Image,
   TouchableOpacity,
   FlatList,
-  Modal,
 } from "react-native";
 import React, { useEffect, useState } from "react";
 
 import { SafeAreaView } from "react-native-safe-area-context";
-
-import { getPendingFriendRequests } from "../services/firestore";
-
+import {
+  getPendingFriendRequests,
+  getUserDataWithEmail,
+  updatePendingFriendRequests,
+} from "../services/firestore";
+import { auth } from "../services/authentication";
 import LoadingIndicator from "../Components/LoadingIndicator";
 
-const FriendRequestContainer = ({ request }) => {
+const FriendRequestContainer = ({
+  request,
+  setIsLoading,
+  fetchFriendRequests,
+}) => {
+  if (!request) return null;
+
+  const profileImage =
+    request.profileImage || "https://via.placeholder.com/150";
+
+  const handleUpdateFriendRequest = async (senderEmail, status) => {
+    setIsLoading(true);
+    const sender = await getUserDataWithEmail(senderEmail);
+    const senderDocId = sender[1].docId;
+    const receiver = await getUserDataWithEmail(auth.currentUser.email);
+    const receiverEmail = auth.currentUser.email;
+    const receiverDocId = receiver[1].docId;
+    const result = await updatePendingFriendRequests(
+      senderEmail,
+      senderDocId,
+      receiverEmail,
+      receiverDocId,
+      status
+    );
+    console.log(result);
+    fetchFriendRequests();
+    setIsLoading(false);
+  };
+
   return (
     <View style={styles.requestUserContainer}>
-      <Image
-        source={{ uri: request.profileImage }}
-        style={styles.requestUserImage}
-      />
-      <Text>{request.displayName}</Text>
-      <TouchableOpacity style={styles.acceptButton}>
+      <Image source={{ uri: profileImage }} style={styles.requestUserImage} />
+      <Text>{request.displayName || "Bilinmeyen Kullanıcı"}</Text>
+      <TouchableOpacity
+        style={styles.acceptButton}
+        onPress={() => handleUpdateFriendRequest(request.email, true)}
+      >
         <Text>Kabul Et</Text>
       </TouchableOpacity>
-      <TouchableOpacity style={styles.rejectButton}>
+      <TouchableOpacity
+        style={styles.rejectButton}
+        onPress={() => handleUpdateFriendRequest(request.email, false)}
+      >
         <Text>Reddet</Text>
       </TouchableOpacity>
     </View>
@@ -36,34 +69,43 @@ const FriendRequestContainer = ({ request }) => {
 const FriendRequestsScreen = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [friendRequests, setFriendRequests] = useState([]);
-  const [profilePictureModalVisibility, setProfilePictureModalVisibility] =
-    useState(false);
+
+  const fetchFriendRequests = async () => {
+    const friendRequestsData = await getPendingFriendRequests();
+    setFriendRequests(friendRequestsData || []);
+    setIsLoading(false);
+  };
+
   useEffect(() => {
     setIsLoading(true);
-    const fetchFriendRequests = async () => {
-      const friendRequestsData = await getPendingFriendRequests();
-      setFriendRequests(friendRequestsData);
-      setIsLoading(false);
-    };
 
     fetchFriendRequests();
   }, []);
 
+  const renderEmptyComponent = () => (
+    <View style={styles.emptyContainer}>
+      <Text>Bekleyen arkadaşlık isteğiniz yok.</Text>
+    </View>
+  );
+
   return (
     <SafeAreaView style={{ flex: 1, gap: 20 }}>
-      <FlatList
-        data={friendRequests}
-        renderItem={({ item }) => <FriendRequestContainer request={item} />}
-      />
-      {/* <Modal>
-        <View style={styles.profilePictureModal}>
-          <Image
-            source={{ uri: request.profileImage }}
-            style={styles.profilePictureModalContent}
-          />
-        </View>
-      </Modal> */}
-      <LoadingIndicator visible={isLoading} />
+      {isLoading ? (
+        <LoadingIndicator visible={isLoading} />
+      ) : (
+        <FlatList
+          data={friendRequests}
+          renderItem={({ item }) => (
+            <FriendRequestContainer
+              request={item}
+              setIsLoading={setIsLoading}
+              fetchFriendRequests={fetchFriendRequests}
+            />
+          )}
+          keyExtractor={(item, index) => index.toString()}
+          ListEmptyComponent={renderEmptyComponent}
+        />
+      )}
     </SafeAreaView>
   );
 };
@@ -74,7 +116,7 @@ const styles = StyleSheet.create({
   requestUserContainer: {
     width: "100%",
     height: 50,
-    backgroundColor: "red",
+    backgroundColor: "yellow",
     padding: 10,
     display: "flex",
     flexDirection: "row",
@@ -97,15 +139,9 @@ const styles = StyleSheet.create({
     padding: 5,
     borderRadius: 5,
   },
-  profilePictureModal: {
+  emptyContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "rgba(0,0,0,0.5)",
-  },
-  profilePictureModalContent: {
-    width: 300,
-    borderRadius: 10,
-    elevation: 5,
   },
 });
