@@ -27,7 +27,7 @@ const LoginScreen = ({ navigation }) => {
     const loginResult = await handleLogin(email, password);
 
     if (loginResult === "Login success") {
-      navigation.navigate("HomeScreen");
+      navigation.navigate("SingleChatScreen");
     } else {
       setWrongError("Email or password is wrong!");
     }

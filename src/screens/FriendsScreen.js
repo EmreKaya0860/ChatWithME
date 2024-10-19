@@ -1,25 +1,25 @@
+import React, { useEffect, useState } from "react";
 import {
-  StyleSheet,
-  Text,
-  View,
-  TouchableOpacity,
-  Modal,
-  TextInput,
   Alert,
   FlatList,
   Image,
+  Modal,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
-import React, { useState, useEffect } from "react";
 
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import {
-  getUserDataWithEmail,
-  sendFriendRequest,
-  getFriends,
-  removeFriend,
-} from "../services/firestore";
 import { auth } from "../services/authentication";
+import {
+  getFriends,
+  getUserDataWithEmail,
+  removeFriend,
+  sendFriendRequest,
+} from "../services/firestore";
 
 import LoadingIndicator from "../Components/LoadingIndicator";
 
@@ -110,6 +110,9 @@ const FriendsScreen = ({ navigation }) => {
   useEffect(() => {
     setIsLoading(true);
     fetchFriends();
+    navigation.addListener("focus", () => {
+      fetchFriends();
+    });
     console.log(friends);
   }, []);
 

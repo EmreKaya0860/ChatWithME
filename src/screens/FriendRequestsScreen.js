@@ -1,21 +1,21 @@
+import React, { useEffect, useState } from "react";
 import {
+  FlatList,
+  Image,
   StyleSheet,
   Text,
-  View,
-  Image,
   TouchableOpacity,
-  FlatList,
+  View,
 } from "react-native";
-import React, { useEffect, useState } from "react";
 
 import { SafeAreaView } from "react-native-safe-area-context";
+import LoadingIndicator from "../Components/LoadingIndicator";
+import { auth } from "../services/authentication";
 import {
   getPendingFriendRequests,
   getUserDataWithEmail,
   updatePendingFriendRequests,
 } from "../services/firestore";
-import { auth } from "../services/authentication";
-import LoadingIndicator from "../Components/LoadingIndicator";
 
 const FriendRequestContainer = ({
   request,
@@ -66,7 +66,7 @@ const FriendRequestContainer = ({
   );
 };
 
-const FriendRequestsScreen = () => {
+const FriendRequestsScreen = ({ navigation }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [friendRequests, setFriendRequests] = useState([]);
 
@@ -80,6 +80,9 @@ const FriendRequestsScreen = () => {
     setIsLoading(true);
 
     fetchFriendRequests();
+    navigation.addListener("focus", () => {
+      fetchFriendRequests();
+    });
   }, []);
 
   const renderEmptyComponent = () => (

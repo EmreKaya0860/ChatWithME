@@ -1,4 +1,3 @@
-import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import React, { useEffect, useState } from "react";
 import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
@@ -11,7 +10,6 @@ import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../services/authentication";
 
 const Stack = createNativeStackNavigator();
-const Tab = createBottomTabNavigator();
 
 const MainRouter = () => {
   const [isUserExist, setIsUserExist] = useState(null);
