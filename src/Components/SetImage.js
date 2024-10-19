@@ -1,18 +1,18 @@
+import FontAwesome from "@expo/vector-icons/FontAwesome";
+import * as ImagePicker from "expo-image-picker";
+import React, { useEffect, useState } from "react";
 import {
+  Image,
+  Modal,
   StyleSheet,
   Text,
-  View,
-  Image,
   TouchableOpacity,
-  Modal,
+  View,
 } from "react-native";
-import React, { useEffect, useState } from "react";
-import * as ImagePicker from "expo-image-picker";
-import FontAwesome from "@expo/vector-icons/FontAwesome";
 
 import { auth } from "../services/authentication";
-import { uploadProfileImage } from "../services/storage";
 import { updateUserData } from "../services/firestore";
+import { uploadProfileImage } from "../services/storage";
 
 const SetImage = ({ docId, profileImageURL, navigation }) => {
   const [image, setImage] = useState(profileImageURL);
@@ -60,7 +60,7 @@ const SetImage = ({ docId, profileImageURL, navigation }) => {
       await updateUserData(docId, updatedData);
     }
     setModalVisible(!modalVisible);
-    navigation.navigate("HomeScreen");
+    navigation.navigate("SingleChatScreen");
   };
 
   useEffect(() => {

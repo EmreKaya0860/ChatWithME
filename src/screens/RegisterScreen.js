@@ -50,7 +50,7 @@ const RegisterScreen = ({ navigation }) => {
 
       await addData("users", { ...userData, userId });
 
-      navigation.navigate("HomeScreen");
+      navigation.navigate("SingleChatScreen");
       setModalVisible(false);
       setIsLoading(false);
     } catch (error) {
