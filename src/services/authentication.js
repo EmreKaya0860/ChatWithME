@@ -1,16 +1,18 @@
-import { app } from "./firebaseconfig";
+import ReactNativeAsyncStorage from "@react-native-async-storage/async-storage";
 import {
+  createUserWithEmailAndPassword,
+  deleteUser,
+  EmailAuthProvider,
   getReactNativePersistence,
   initializeAuth,
+  reauthenticateWithCredential,
+  sendEmailVerification,
+  sendPasswordResetEmail,
   signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
   updateEmail,
   updatePassword,
-  sendEmailVerification,
-  EmailAuthProvider,
-  reauthenticateWithCredential,
 } from "firebase/auth";
-import ReactNativeAsyncStorage from "@react-native-async-storage/async-storage";
+import { app } from "./firebaseconfig";
 
 export const auth = initializeAuth(app, {
   persistence: getReactNativePersistence(ReactNativeAsyncStorage),
@@ -74,11 +76,38 @@ export const verifyEmail = (user) => {
     });
 };
 
+export const handlePasswordReset = async (email) => {
+  sendPasswordResetEmail(auth, email)
+    .then(() => {
+      console.log("Password reset email sent!");
+      return "Şifre sıfırlama e-postası gönderildi!";
+    })
+    .catch((error) => {
+      console.error("Error sending password reset email: ", error);
+      return error.message;
+    });
+};
+
 export const reauthenticate = async (user, email, password) => {
   const credential = EmailAuthProvider.credential(email, password);
   try {
     await reauthenticateWithCredential(user, credential);
   } catch (error) {
     console.error("Error reauthenticating: ", error);
+  }
+};
+
+export const handleDeleteUser = async (user) => {
+  try {
+    deleteUser(user)
+      .then(() => {
+        console.log("User deleted successfully!");
+        return "Hesabınız Silindi!";
+      })
+      .catch((error) => {
+        console.error("Error deleting user: ", error);
+      });
+  } catch (error) {
+    console.error("Error deleting user: ", error);
   }
 };

@@ -11,6 +11,7 @@ import {
   updateDoc,
   arrayUnion,
   arrayRemove,
+  deleteDoc,
 } from "firebase/firestore";
 
 export const db = getFirestore(app);
@@ -226,5 +227,36 @@ export const updatePendingFriendRequests = async (
   } catch (error) {
     console.error("Error updating pending friend requests: ", error);
     return { success: false, message: "Bir hata oluştu." };
+  }
+};
+
+export const handleDeleteAccountDocument = async (docId, email) => {
+  try {
+    await deleteDoc(doc(db, "users", docId));
+    await removeFromOtherUsersFriends(email);
+    return "Account document deleted successfully!";
+  } catch (error) {
+    console.error("Error deleting account document: ", error);
+    return error.message;
+  }
+};
+
+const removeFromOtherUsersFriends = async (email) => {
+  try {
+    const usersRef = collection(db, "users");
+    const q = query(usersRef, where("friends", "array-contains", email));
+    const snapshot = await getDocs(q);
+
+    const updates = snapshot.docs.map((doc) =>
+      updateDoc(doc.ref, {
+        friends: arrayRemove(email),
+      })
+    );
+
+    await Promise.all(updates);
+    console.log("Kullanıcı diğer arkadaşların listesinden silindi.");
+  } catch (error) {
+    console.error("Error removing from friends lists: ", error);
+    throw error;
   }
 };

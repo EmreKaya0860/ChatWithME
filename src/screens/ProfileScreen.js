@@ -1,23 +1,27 @@
+import React, { useEffect, useState } from "react";
 import {
+  Alert,
+  Modal,
   StyleSheet,
   Text,
-  View,
   TextInput,
-  Button,
-  Modal,
-  Alert,
   TouchableOpacity,
+  View,
 } from "react-native";
-import React, { useEffect, useState } from "react";
 
-import { getUserData, updateUserData } from "../services/firestore";
 import {
   auth,
+  handleDeleteUser,
   handleUpdateEmail,
-  verifyEmail,
-  reauthenticate,
   handleUpdatePassword,
+  reauthenticate,
+  verifyEmail,
 } from "../services/authentication";
+import {
+  getUserData,
+  handleDeleteAccountDocument,
+  updateUserData,
+} from "../services/firestore";
 
 import LoadingIndicator from "../Components/LoadingIndicator";
 import SetImage from "../Components/SetImage";
@@ -31,6 +35,8 @@ const ProfileScreen = ({ navigation }) => {
   const [documentId, setDocumentId] = useState("");
   const [oldUserData, setOldUserData] = useState({});
   const [enteredOldPassword, setEnteredOldPassword] = useState("");
+  const [deleteAccountModalVisibility, setDeleteAccountModalVisibility] =
+    useState(false);
 
   useEffect(() => {
     setLoading(true);
@@ -57,14 +63,15 @@ const ProfileScreen = ({ navigation }) => {
       oldUserData.password
     );
     if (oldUserData.password !== enteredOldPassword) {
-      Alert.alert("Hata", "Eski Şifre uyuşmuyor!");
+      Alert.alert("Hata", "Eski Şifre uyuşmuyor!", [{ text: "Tamam" }]);
       setLoading(false);
       return;
     } else if (oldUserData.password !== userData.password) {
       console.log("Şifre değişti");
       Alert.alert(
         "Şifre Değişikliği",
-        "Şife değişikliği sonrası yeniden giriş yapmanız gerekmektedir!"
+        "Şife değişikliği sonrası yeniden giriş yapmanız gerekmektedir!",
+        [{ text: "Tamam" }]
       );
       handleUpdatePassword(auth.currentUser, userData.password);
       auth.signOut();
@@ -74,21 +81,46 @@ const ProfileScreen = ({ navigation }) => {
     if (auth.currentUser.email !== userData.email) {
       console.log("Email değişti");
       console.log(auth.currentUser.emailVerified);
+      Alert.alert(
+        "Email Değişikliği",
+        "Email değişikliği sonrası yeniden giriş yapmanız gerekmektedir!",
+        [{ text: "Tamam" }]
+      );
       handleUpdateEmail(auth.currentUser, userData.email);
+      auth.signOut();
     }
     if (result === "User data updated successfully!") {
-      Alert.alert("Başarılı", "Kullanıcı bilgileri güncellendi!");
+      Alert.alert("Başarılı", "Kullanıcı bilgileri güncellendi!", [
+        { text: "Tamam" },
+      ]);
     } else {
-      Alert.alert("Hata", "Kullanıcı bilgileri güncellenemedi!");
+      Alert.alert("Hata", "Kullanıcı bilgileri güncellenemedi!", [
+        { text: "Tamam" },
+      ]);
     }
     setLoading(false);
     setIsEditable("");
+    console.log(oldUserData.password);
   };
 
   const handleEmailVerification = () => {
     const result = verifyEmail(auth.currentUser);
-    Alert.alert("Email onayı", result);
+    Alert.alert("Email onayı", "Mail'inize onay epostası gönderildi", [
+      { text: "Tamam" },
+    ]);
     console.log(result);
+  };
+
+  const handleDeleteAccount = async () => {
+    setLoading(true);
+    await reauthenticate(
+      auth.currentUser,
+      oldUserData.email,
+      oldUserData.password
+    );
+    await handleDeleteAccountDocument(documentId, oldUserData.email);
+    const result = await handleDeleteUser(auth.currentUser);
+    Alert.alert("Hesap Silme", result, [{ text: "Tamam" }]);
   };
 
   const handleSignOut = () => {
@@ -218,11 +250,52 @@ const ProfileScreen = ({ navigation }) => {
       <View style={styles.profileDateContainer}>
         <Text>Profil Oluşturma Tarihi: {userData.createdAt}</Text>
         <Text>Profil Güncelleme Tarihi: {userData.updatedAt}</Text>
+        <TouchableOpacity
+          onPress={() =>
+            setDeleteAccountModalVisibility(!deleteAccountModalVisibility)
+          }
+        >
+          <Text>Hesabı Sil</Text>
+        </TouchableOpacity>
       </View>
 
       <TouchableOpacity onPress={handleSignOut} style={styles.signOutButton}>
         <Text>Sign Out</Text>
       </TouchableOpacity>
+      <Modal
+        transparent={true}
+        animationType="fade"
+        visible={deleteAccountModalVisibility}
+      >
+        <View style={styles.deleteAccountModalContainer}>
+          <View style={styles.deleteAccountModalContent}>
+            <Text>Hesabınızı silmek istediğinize emin misiniz?</Text>
+            <Text style={styles.importantNoteText}>
+              Not: Hesabınızı sildiğinizde geri dönüşü olmayacaktır!
+            </Text>
+            <View style={styles.deleteAccountModalButtons}>
+              <TouchableOpacity
+                style={styles.deleteAccountModalAcceptButton}
+                onPress={handleDeleteAccount}
+              >
+                <Text style={styles.deleteAccountModalButtonsTextColor}>
+                  Evet
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.deleteAccountModalRejectButton}
+                onPress={() =>
+                  setDeleteAccountModalVisibility(!deleteAccountModalVisibility)
+                }
+              >
+                <Text style={styles.deleteAccountModalButtonsTextColor}>
+                  Hayır
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
       {loading && <LoadingIndicator visible={loading} />}
     </SafeAreaView>
   );
@@ -295,5 +368,48 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     color: "white",
+  },
+  deleteAccountModalContainer: {
+    backgroundColor: "rgba(0, 0, 0, 0.2)",
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  deleteAccountModalContent: {
+    backgroundColor: "white",
+    width: "80%",
+    height: "25%",
+    borderRadius: 10,
+    padding: 20,
+    gap: 20,
+  },
+  importantNoteText: {
+    color: "red",
+    fontWeight: "bold",
+    fontSize: 16,
+  },
+  deleteAccountModalButtons: {
+    display: "flex",
+    flexDirection: "row",
+    justifyContent: "space-around",
+  },
+  deleteAccountModalAcceptButton: {
+    backgroundColor: "red",
+    width: 100,
+    alignItems: "center",
+    padding: 10,
+    borderRadius: 10,
+  },
+  deleteAccountModalRejectButton: {
+    backgroundColor: "green",
+    width: 100,
+    alignItems: "center",
+    padding: 10,
+    borderRadius: 10,
+  },
+  deleteAccountModalButtonsTextColor: {
+    color: "white",
+    fontWeight: "bold",
+    fontSize: 16,
   },
 });
