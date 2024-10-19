@@ -1,13 +1,14 @@
+import React, { useState } from "react";
 import {
+  Alert,
+  Modal,
   StyleSheet,
   Text,
-  View,
-  TouchableOpacity,
   TextInput,
-  ActivityIndicator,
+  TouchableOpacity,
+  View,
 } from "react-native";
-import React, { useState } from "react";
-import { handleLogin } from "../services/authentication";
+import { handleLogin, handlePasswordReset } from "../services/authentication";
 
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -18,6 +19,8 @@ const LoginScreen = ({ navigation }) => {
   const [password, setPassword] = useState("");
   const [wrongError, setWrongError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [passwordResetModalVisibility, setPasswordResetModalVisibility] =
+    useState(false);
 
   const loginAndNavigate = async () => {
     setIsLoading(true);
@@ -33,6 +36,15 @@ const LoginScreen = ({ navigation }) => {
 
   const handleNavigation = () => {
     navigation.navigate("RegisterScreen");
+  };
+
+  const handlePasswordResetButton = async () => {
+    setIsLoading(true);
+    const resetResult = await handlePasswordReset(email);
+    console.log(resetResult);
+    setPasswordResetModalVisibility(!passwordResetModalVisibility);
+    setIsLoading(false);
+    Alert.alert("Şifre Sıfırlama", resetResult);
   };
 
   return (
@@ -57,6 +69,41 @@ const LoginScreen = ({ navigation }) => {
       <TouchableOpacity onPress={handleNavigation}>
         <Text>Do not have account? Register</Text>
       </TouchableOpacity>
+      <TouchableOpacity
+        onPress={() =>
+          setPasswordResetModalVisibility(!passwordResetModalVisibility)
+        }
+      >
+        <Text>Forgot the password? Send Reset Email!</Text>
+      </TouchableOpacity>
+      <Modal
+        transparent={true}
+        visible={passwordResetModalVisibility}
+        animationType="slide"
+      >
+        <View style={styles.resetPasswordContainer}>
+          <View style={styles.resetPasswordContent}>
+            <Text>Şifrenizi sıfırlamak için email adresinizi giriniz.</Text>
+            <Text>
+              Not: Şifre sıfırlama epostası almanız için mail adresinizi
+              doğrulamanız gerekmektedir!
+            </Text>
+            <TextInput
+              placeholder="Email"
+              onChangeText={(email) => setEmail(email)}
+              inputMode="email"
+            />
+            <TouchableOpacity onPress={handlePasswordResetButton}>
+              <Text>Şifre Sıfırla</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => setPasswordResetModalVisibility(false)}
+            >
+              <Text>Kapat</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
       {isLoading ? <LoadingIndicator visible={isLoading} /> : null}
     </SafeAreaView>
   );
@@ -72,5 +119,18 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+  },
+  resetPasswordContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0,0,0,0.2)",
+  },
+  resetPasswordContent: {
+    width: 300,
+    padding: 20,
+    backgroundColor: "white",
+    borderRadius: 10,
+    elevation: 5,
   },
 });
