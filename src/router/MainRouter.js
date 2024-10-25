@@ -2,6 +2,8 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import React, { useEffect, useState } from "react";
 import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
 
+import GroupLiveChatRoom from "../screens/GroupLiveChatRoom";
+import LiveChatRoom from "../screens/LiveChatRoom";
 import LoginScreen from "../screens/LoginScreen";
 import RegisterScreen from "../screens/RegisterScreen";
 import HomeNavigator from "./HomeNavigator";
@@ -46,6 +48,11 @@ const MainRouter = () => {
       {isUserExist ? (
         <>
           <Stack.Screen name="HomeNavigator" component={HomeNavigator} />
+          <Stack.Screen name="LiveChatRoom" component={LiveChatRoom} />
+          <Stack.Screen
+            name="GroupLiveChatRoom"
+            component={GroupLiveChatRoom}
+          />
         </>
       ) : (
         <>
