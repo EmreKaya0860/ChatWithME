@@ -145,9 +145,7 @@ const FriendsScreen = ({ navigation }) => {
 
   const renderEmptyComponent = () => (
     <View style={styles.emptyContainer}>
-      <Text>
-        Hiç arkadaşınız yok :/ Mesajlaşmaya başlamak için arkadaş edinin.
-      </Text>
+      <Text>Hiç arkadaşınız yok :/</Text>
     </View>
   );
 

@@ -5,8 +5,8 @@ import { StyleSheet } from "react-native";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import Ionicons from "@expo/vector-icons/Ionicons";
 
-import FriendRequestsScreen from "../screens/FriendRequestsScreen";
 import FriendsScreen from "../screens/FriendsScreen";
+import GroupChatScreen from "../screens/GroupChatScreen";
 import ProfileScreen from "../screens/ProfileScreen";
 import SingleChatScreen from "../screens/SingleChatScreen";
 
@@ -30,8 +30,8 @@ const HomeNavigator = () => {
         }}
       />
       <Tab.Screen
-        name="FriendRequestsScreen"
-        component={FriendRequestsScreen}
+        name="GroupChatScreen"
+        component={GroupChatScreen}
         options={{
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="chatbubbles" size={size} color={color} />
