@@ -10,16 +10,24 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-
 import { auth } from "../services/authentication";
 import { getSingleChatMessages, sendMessage } from "../services/livechat";
+
+// Tarih formatlayıcı fonksiyon
+const formatSendTime = (sendTime) => {
+  const messageDate = sendTime.toDate(); // Firestore Timestamp'ten Date'e dönüştür
+  return messageDate.toLocaleTimeString([], {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false, // 24 saat format
+  });
+};
 
 const LiveChatRoom = ({ route, navigation }) => {
   const [message, setMessage] = useState("");
   const [oldMessages, setOldMessages] = useState([]);
   const flatListRef = useRef(null);
   const { friend } = route.params;
-
   const profileImage =
     friend.profileImage ||
     "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png";
@@ -45,6 +53,7 @@ const LiveChatRoom = ({ route, navigation }) => {
 
   const renderMessage = ({ item }) => {
     const isMyMessage = item.senderId === auth.currentUser.uid;
+
     return (
       <View
         style={[
@@ -56,40 +65,43 @@ const LiveChatRoom = ({ route, navigation }) => {
           {isMyMessage ? "Ben" : friend.displayName}
         </Text>
         <Text style={styles.messageText}>{item.text}</Text>
+        {/* Mesajın gönderim zamanını gösteriyoruz */}
+        <Text style={styles.sendTime}>{formatSendTime(item.sendTime)}</Text>
       </View>
     );
   };
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
+    <SafeAreaView style={styles.container}>
       <View style={styles.headerContainer}>
         <TouchableOpacity onPress={handleGoBack}>
-          <MaterialIcons name="navigate-before" size={35} color="black" />
+          <MaterialIcons name="navigate-before" size={35} color="#fff" />
         </TouchableOpacity>
         <Image source={{ uri: profileImage }} style={styles.chatUserImage} />
-        <Text>{friend.displayName || "Bilinmeyen Kullanıcı"}</Text>
+        <Text style={styles.headerText}>
+          {friend.displayName || "Bilinmeyen Kullanıcı"}
+        </Text>
       </View>
-
       <FlatList
-        ref={flatListRef} // FlatList'in ref'ini verdik
+        ref={flatListRef}
         data={oldMessages}
         renderItem={renderMessage}
         keyExtractor={(item, index) => index.toString()}
         contentContainerStyle={styles.messagesContainer}
         onContentSizeChange={() =>
           flatListRef.current?.scrollToEnd({ animated: true })
-        } // İçerik değiştiğinde otomatik olarak en alta kaydır
+        }
       />
-
       <View style={styles.inputContainer}>
         <TextInput
           placeholder="Mesajınızı yazın..."
+          placeholderTextColor="#aaa"
           style={styles.messageInput}
           value={message}
           onChangeText={(text) => setMessage(text)}
         />
         <TouchableOpacity onPress={sendMessages}>
-          <MaterialIcons name="send" size={35} color="black" />
+          <MaterialIcons name="send" size={35} color="#bb86fc" />
         </TouchableOpacity>
       </View>
     </SafeAreaView>
@@ -99,18 +111,27 @@ const LiveChatRoom = ({ route, navigation }) => {
 export default LiveChatRoom;
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#2E2E2E",
+  },
   headerContainer: {
     flexDirection: "row",
     alignItems: "center",
     padding: 10,
+    backgroundColor: "#1e1e1e",
     elevation: 2,
-    gap: 30,
-    backgroundColor: "white",
   },
   chatUserImage: {
     width: 50,
     height: 50,
     borderRadius: 50,
+    marginRight: 10,
+  },
+  headerText: {
+    color: "#fff",
+    fontSize: 18,
+    fontWeight: "bold",
   },
   messagesContainer: {
     paddingHorizontal: 10,
@@ -125,30 +146,39 @@ const styles = StyleSheet.create({
     marginVertical: 5,
   },
   myMessage: {
-    backgroundColor: "#DCF8C6",
+    backgroundColor: "#bb86fc",
     alignSelf: "flex-end",
   },
   friendMessage: {
-    backgroundColor: "#ECECEC",
+    backgroundColor: "#3D3D3D",
     alignSelf: "flex-start",
   },
   senderName: {
     fontWeight: "bold",
+    color: "#fff",
     marginBottom: 5,
   },
   messageText: {
+    color: "#fff",
     fontSize: 16,
+  },
+  sendTime: {
+    color: "#ccc",
+    fontSize: 12,
+    marginTop: 5,
+    alignSelf: "flex-end",
   },
   inputContainer: {
     flexDirection: "row",
     alignItems: "center",
     padding: 10,
-    backgroundColor: "white",
+    backgroundColor: "#1e1e1e",
   },
   messageInput: {
     flex: 1,
     padding: 10,
-    backgroundColor: "#F2F2F2",
+    backgroundColor: "#3D3D3D",
+    color: "#fff",
     borderRadius: 20,
     marginRight: 10,
   },
