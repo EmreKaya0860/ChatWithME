@@ -1,4 +1,5 @@
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import * as DocumentPicker from "expo-document-picker";
 import React, { useEffect, useRef, useState } from "react";
 import {
   FlatList,
@@ -13,19 +14,21 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { auth } from "../services/authentication";
 import { getSingleChatMessages, sendMessage } from "../services/livechat";
 
-// Tarih formatlayıcı fonksiyon
+import { uploadChatFile } from "../services/storage";
+
 const formatSendTime = (sendTime) => {
-  const messageDate = sendTime.toDate(); // Firestore Timestamp'ten Date'e dönüştür
+  const messageDate = sendTime.toDate();
   return messageDate.toLocaleTimeString([], {
     hour: "2-digit",
     minute: "2-digit",
-    hour12: false, // 24 saat format
+    hour12: false,
   });
 };
 
 const LiveChatRoom = ({ route, navigation }) => {
   const [message, setMessage] = useState("");
   const [oldMessages, setOldMessages] = useState([]);
+  const [selectedFile, setSelectedFile] = useState(null);
   const flatListRef = useRef(null);
   const { friend } = route.params;
   const profileImage =
@@ -33,9 +36,15 @@ const LiveChatRoom = ({ route, navigation }) => {
     "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png";
 
   const sendMessages = async () => {
+    if (selectedFile) {
+      const response = await fetch(selectedFile.uri);
+      const blob = await response.blob();
+      const downloadUrl = await uploadChatFile(blob);
+    }
     await sendMessage(friend, message);
     setMessage("");
     getMessages();
+    setSelectedFile(null);
   };
 
   const getMessages = async () => {
@@ -49,6 +58,22 @@ const LiveChatRoom = ({ route, navigation }) => {
 
   const handleGoBack = () => {
     navigation.goBack();
+  };
+
+  const pickDocument = async () => {
+    try {
+      console.log("Dosya seçme işlemi başlatıldı ...");
+      const result = await DocumentPicker.getDocumentAsync({});
+      if (result.canceled === false) {
+        setSelectedFile(result.assets[0]);
+        setMessage(result.assets[0].name);
+        console.log("Seçilen dosya:", result.assets[0]);
+      } else {
+        console.log("Dosya seçme işlemi iptal edildi.");
+      }
+    } catch (error) {
+      console.error("Dosya seçme hatası:", error);
+    }
   };
 
   const renderMessage = ({ item }) => {
@@ -65,8 +90,7 @@ const LiveChatRoom = ({ route, navigation }) => {
           {isMyMessage ? "Ben" : friend.displayName}
         </Text>
         <Text style={styles.messageText}>{item.text}</Text>
-        {/* Mesajın gönderim zamanını gösteriyoruz */}
-        <Text style={styles.sendTime}>{formatSendTime(item.sendTime)}</Text>
+        <Text style={styles.messageTime}>{formatSendTime(item.sendTime)}</Text>
       </View>
     );
   };
@@ -93,6 +117,9 @@ const LiveChatRoom = ({ route, navigation }) => {
         }
       />
       <View style={styles.inputContainer}>
+        <TouchableOpacity onPress={pickDocument}>
+          <MaterialIcons name="attach-file" size={30} color="#bb86fc" />
+        </TouchableOpacity>
         <TextInput
           placeholder="Mesajınızı yazın..."
           placeholderTextColor="#aaa"
@@ -104,6 +131,11 @@ const LiveChatRoom = ({ route, navigation }) => {
           <MaterialIcons name="send" size={35} color="#bb86fc" />
         </TouchableOpacity>
       </View>
+      {selectedFile && (
+        <View style={styles.fileContainer}>
+          <Text style={styles.fileName}>{selectedFile.name}</Text>
+        </View>
+      )}
     </SafeAreaView>
   );
 };
@@ -162,10 +194,10 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 16,
   },
-  sendTime: {
-    color: "#ccc",
-    fontSize: 12,
+  messageTime: {
     marginTop: 5,
+    fontSize: 12,
+    color: "#bbb",
     alignSelf: "flex-end",
   },
   inputContainer: {
@@ -180,6 +212,17 @@ const styles = StyleSheet.create({
     backgroundColor: "#3D3D3D",
     color: "#fff",
     borderRadius: 20,
-    marginRight: 10,
+    marginHorizontal: 10,
+  },
+  fileContainer: {
+    padding: 10,
+    backgroundColor: "#3D3D3D",
+    margin: 10,
+    borderRadius: 10,
+    flexWrap: "wrap",
+  },
+  fileName: {
+    color: "#fff",
+    fontSize: 14,
   },
 });

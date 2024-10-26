@@ -47,7 +47,6 @@ export const getSingleChatMessages = async (friend, setOldMessages) => {
 
     querySnapshot.forEach((doc) => {
       const data = doc.data();
-      // İki üyeyi de kontrol ederek doğru sohbeti bul
       if (data.members.includes(friend.userId)) {
         chatData = data;
         onSnapshot(doc.ref, (doc) => {
@@ -94,14 +93,12 @@ export const sendMessage = async (friend, text) => {
       return;
     }
 
-    // Mesaj verisi oluştur
     const newMessage = {
       senderId: auth.currentUser.uid,
       text,
       sendTime: Timestamp.now(),
     };
 
-    // Firestore'daki ilgili sohbetin `messages` alanına mesaj ekle
     const chatDocRef = doc(db, "singleChats", chatId);
     await updateDoc(chatDocRef, {
       messages: arrayUnion(newMessage),
