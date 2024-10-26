@@ -1,3 +1,4 @@
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import React, { useEffect, useState } from "react";
 import {
   FlatList,
@@ -7,7 +8,6 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-
 import { SafeAreaView } from "react-native-safe-area-context";
 import LoadingIndicator from "../Components/LoadingIndicator";
 import { auth } from "../services/authentication";
@@ -23,7 +23,6 @@ const FriendRequestContainer = ({
   fetchFriendRequests,
 }) => {
   if (!request) return null;
-
   const profileImage =
     request.profileImage || "https://via.placeholder.com/150";
 
@@ -49,18 +48,20 @@ const FriendRequestContainer = ({
   return (
     <View style={styles.requestUserContainer}>
       <Image source={{ uri: profileImage }} style={styles.requestUserImage} />
-      <Text>{request.displayName || "Bilinmeyen Kullanıcı"}</Text>
+      <Text style={styles.requestUserName}>
+        {request.displayName || "Bilinmeyen Kullanıcı"}
+      </Text>
       <TouchableOpacity
         style={styles.acceptButton}
         onPress={() => handleUpdateFriendRequest(request.email, true)}
       >
-        <Text>Kabul Et</Text>
+        <Text style={styles.buttonText}>Kabul Et</Text>
       </TouchableOpacity>
       <TouchableOpacity
         style={styles.rejectButton}
         onPress={() => handleUpdateFriendRequest(request.email, false)}
       >
-        <Text>Reddet</Text>
+        <Text style={styles.buttonText}>Reddet</Text>
       </TouchableOpacity>
     </View>
   );
@@ -78,7 +79,6 @@ const FriendRequestsScreen = ({ navigation }) => {
 
   useEffect(() => {
     setIsLoading(true);
-
     fetchFriendRequests();
     navigation.addListener("focus", () => {
       fetchFriendRequests();
@@ -87,12 +87,19 @@ const FriendRequestsScreen = ({ navigation }) => {
 
   const renderEmptyComponent = () => (
     <View style={styles.emptyContainer}>
-      <Text>Bekleyen arkadaşlık isteğiniz yok.</Text>
+      <Text style={styles.emptyText}>Bekleyen arkadaşlık isteğiniz yok.</Text>
     </View>
   );
 
+  const handleGoBack = () => {
+    navigation.goBack();
+  };
+
   return (
-    <SafeAreaView style={{ flex: 1, gap: 20 }}>
+    <SafeAreaView style={styles.container}>
+      <TouchableOpacity onPress={handleGoBack}>
+        <MaterialIcons name="navigate-before" size={35} color="#fff" />
+      </TouchableOpacity>
       {isLoading ? (
         <LoadingIndicator visible={isLoading} />
       ) : (
@@ -116,35 +123,55 @@ const FriendRequestsScreen = ({ navigation }) => {
 export default FriendRequestsScreen;
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#2E2E2E",
+  },
   requestUserContainer: {
     width: "100%",
-    height: 50,
-    backgroundColor: "yellow",
-    padding: 10,
-    display: "flex",
+    padding: 15,
+    backgroundColor: "#3D3D3D",
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
     marginVertical: 5,
+    borderRadius: 10,
   },
   requestUserImage: {
     width: 50,
     height: 50,
     borderRadius: 50,
+    marginRight: 15,
+  },
+  requestUserName: {
+    color: "#fff",
+    fontSize: 16,
+    flex: 1,
   },
   acceptButton: {
     backgroundColor: "green",
-    padding: 5,
+    padding: 10,
     borderRadius: 5,
+    marginRight: 5,
   },
   rejectButton: {
     backgroundColor: "red",
-    padding: 5,
+    padding: 10,
     borderRadius: 5,
+  },
+  buttonText: {
+    color: "#fff",
+    fontSize: 14,
+    fontWeight: "bold",
   },
   emptyContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+  },
+  emptyText: {
+    color: "#aaa",
+    fontSize: 16,
+    textAlign: "center",
+    marginTop: 10,
   },
 });

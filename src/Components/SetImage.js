@@ -9,7 +9,6 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-
 import { auth } from "../services/authentication";
 import { updateUserData } from "../services/firestore";
 import { uploadProfileImage } from "../services/storage";
@@ -27,7 +26,6 @@ const SetImage = ({ docId, profileImageURL, navigation }) => {
         alert("Kamera izni verilmedi!");
         return;
       }
-
       result = await ImagePicker.launchCameraAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.All,
         allowsEditing: true,
@@ -42,7 +40,6 @@ const SetImage = ({ docId, profileImageURL, navigation }) => {
         alert("Galeri izni verilmedi!");
         return;
       }
-
       result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.All,
         allowsEditing: true,
@@ -50,7 +47,6 @@ const SetImage = ({ docId, profileImageURL, navigation }) => {
         quality: 1,
       });
     }
-
     if (!result.canceled) {
       const response = await fetch(result.assets[0].uri);
       const blob = await response.blob();
@@ -69,12 +65,10 @@ const SetImage = ({ docId, profileImageURL, navigation }) => {
 
   return (
     <View style={styles.container}>
-      <Text>SetImage</Text>
       <TouchableOpacity onPress={() => setModalVisible(!modalVisible)}>
         {image && <Image source={{ uri: image }} style={styles.image} />}
-        <Text>sss</Text>
+        <Text style={styles.changePhotoText}>Profil Fotoğrafını Değiştir</Text>
       </TouchableOpacity>
-
       <Modal
         animationType="slide"
         transparent={true}
@@ -83,25 +77,27 @@ const SetImage = ({ docId, profileImageURL, navigation }) => {
       >
         <View style={styles.selectImageFromContainer}>
           <View style={styles.selectImageOptionsContainer}>
-            <Text>Profil Fotoğrafını Nereden Yüklemek İstersiniz?</Text>
+            <Text style={styles.modalTitle}>
+              Profil Fotoğrafını Nereden Yüklemek İstersiniz?
+            </Text>
             <View style={styles.optionsContainer}>
               <TouchableOpacity
                 style={styles.selectImageOptionContainer}
                 onPress={() => pickImage("camera")}
               >
-                <FontAwesome name="camera" size={24} color="black" />
-                <Text>Kamera</Text>
+                <FontAwesome name="camera" size={24} color="#bb86fc" />
+                <Text style={styles.optionText}>Kamera</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={styles.selectImageOptionContainer}
                 onPress={() => pickImage("gallery")}
               >
-                <FontAwesome name="file-image-o" size={24} color="black" />
-                <Text>Galeri</Text>
+                <FontAwesome name="file-image-o" size={24} color="#bb86fc" />
+                <Text style={styles.optionText}>Galeri</Text>
               </TouchableOpacity>
             </View>
             <TouchableOpacity onPress={() => setModalVisible(!modalVisible)}>
-              <Text>Kapat</Text>
+              <Text style={styles.closeText}>Kapat</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -114,43 +110,54 @@ export default SetImage;
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "red",
+    backgroundColor: "#2E2E2E",
+    padding: 20,
+    borderRadius: 10,
   },
   image: {
     width: 100,
     height: 100,
     borderRadius: 50,
+    marginBottom: 10,
+  },
+  changePhotoText: {
+    color: "#bb86fc",
+    fontWeight: "bold",
+    textAlign: "center",
   },
   selectImageFromContainer: {
-    backgroundColor: "rgba(0, 0, 0, 0.3)",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
     flex: 1,
-    bottom: 0,
+    justifyContent: "flex-end",
   },
   selectImageOptionsContainer: {
-    height: 200,
-    backgroundColor: "white",
-    display: "flex",
-    position: "absolute",
-    width: "100%",
-    justifyContent: "center",
+    backgroundColor: "#3D3D3D",
+    padding: 20,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
     alignItems: "center",
-    bottom: 0,
-    borderRadius: 10,
-    gap: 20,
   },
-  selectImageOptionContainer: {
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    gap: 10,
+  modalTitle: {
+    color: "#fff",
+    fontSize: 18,
+    marginBottom: 20,
   },
   optionsContainer: {
-    justifyContent: "space-around",
-    alignItems: "center",
     flexDirection: "row",
+    justifyContent: "space-around",
     width: "100%",
+  },
+  selectImageOptionContainer: {
+    alignItems: "center",
+  },
+  optionText: {
+    color: "#fff",
+    marginTop: 5,
+  },
+  closeText: {
+    color: "#bb86fc",
+    marginTop: 20,
   },
 });

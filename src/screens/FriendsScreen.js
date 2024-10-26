@@ -34,7 +34,6 @@ const FriendsContainer = ({ friend, setIsLoading, fetchFriends }) => {
   const [removeFriendModalVisibility, setRemoveFriendModalVisibility] =
     useState(false);
   if (!friend) return null;
-
   const profileImage = friend.profileImage || "https://via.placeholder.com/150";
 
   const handleRemoveFriend = async (friendEmail, status) => {
@@ -61,13 +60,15 @@ const FriendsContainer = ({ friend, setIsLoading, fetchFriends }) => {
   return (
     <View style={styles.friendUserContainer}>
       <Image source={{ uri: profileImage }} style={styles.friendUserImage} />
-      <Text>{friend.displayName || "Bilinmeyen Kullanıcı"}</Text>
+      <Text style={styles.friendUserName}>
+        {friend.displayName || "Bilinmeyen Kullanıcı"}
+      </Text>
       <TouchableOpacity
         onPress={() =>
           setRemoveFriendModalVisibility(!removeFriendModalVisibility)
         }
       >
-        <AntDesign name="delete" size={24} color="red" />
+        <AntDesign name="delete" size={24} color="#bb86fc" />
       </TouchableOpacity>
       <Modal
         transparent={true}
@@ -76,16 +77,20 @@ const FriendsContainer = ({ friend, setIsLoading, fetchFriends }) => {
       >
         <View style={styles.removeFriendModalContainer}>
           <View style={styles.removeFriendModalContent}>
-            <Text>Arkadaşınızı silmek istediğinize emin misiniz?</Text>
+            <Text style={styles.modalText}>
+              Arkadaşınızı silmek istediğinize emin misiniz?
+            </Text>
             <TouchableOpacity
+              style={styles.modalButton}
               onPress={() => handleRemoveFriend(friend.email, true)}
             >
-              <Text>Evet</Text>
+              <Text style={styles.buttonText}>Evet</Text>
             </TouchableOpacity>
             <TouchableOpacity
+              style={styles.modalButton}
               onPress={() => handleRemoveFriend(friend.email, false)}
             >
-              <Text>Hayır</Text>
+              <Text style={styles.buttonText}>Hayır</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -150,8 +155,8 @@ const FriendsScreen = ({ navigation }) => {
   );
 
   return (
-    <SafeAreaView style={{ flex: 1, gap: 20 }}>
-      <Text>FriendsScreen</Text>
+    <SafeAreaView style={styles.container}>
+      <Text style={styles.title}>Arkadaşlar</Text>
       <FlatList
         data={friends}
         renderItem={({ item }) => (
@@ -166,13 +171,17 @@ const FriendsScreen = ({ navigation }) => {
         scrollEnabled={true}
         overScrollMode="always"
       />
-      <TouchableOpacity onPress={() => setModalVisibility(!modalVisibility)}>
-        <Text>Add Friend</Text>
+      <TouchableOpacity
+        style={styles.addButton}
+        onPress={() => setModalVisibility(!modalVisibility)}
+      >
+        <Text style={styles.addButtonText}>Arkadaş Ekle</Text>
       </TouchableOpacity>
       <TouchableOpacity
+        style={styles.addButton}
         onPress={() => navigation.navigate("FriendRequestsScreen")}
       >
-        <Text>Friend Requests</Text>
+        <Text style={styles.addButtonText}>Arkadaşlık İstekleri</Text>
       </TouchableOpacity>
       <Modal
         visible={modalVisibility}
@@ -182,13 +191,14 @@ const FriendsScreen = ({ navigation }) => {
       >
         <View style={styles.addFriendModalContainer}>
           <View style={styles.addFriendModalContent}>
-            <Text>Arkadaş Ekle</Text>
-            <Text>
+            <Text style={styles.modalTitle}>Arkadaş Ekle</Text>
+            <Text style={styles.modalSubtitle}>
               Arkadaş eklemek istediğiniz kişinin e-posta adresini giriniz:
             </Text>
             <TextInput
               style={styles.inputArea}
               placeholder="E-posta"
+              placeholderTextColor="#aaa"
               keyboardType="email-address"
               onChangeText={(email) => {
                 setAddFriendEmail(email);
@@ -196,14 +206,18 @@ const FriendsScreen = ({ navigation }) => {
               }}
             />
             <Text style={styles.emailError}>{emailError}</Text>
-            <View
-              style={{ flexDirection: "row", justifyContent: "space-around" }}
-            >
-              <TouchableOpacity onPress={handleAddFriend}>
-                <Text>Ekle</Text>
+            <View style={styles.modalButtonContainer}>
+              <TouchableOpacity
+                style={styles.modalButton}
+                onPress={handleAddFriend}
+              >
+                <Text style={styles.buttonText}>Ekle</Text>
               </TouchableOpacity>
-              <TouchableOpacity onPress={() => setModalVisibility(false)}>
-                <Text>İptal</Text>
+              <TouchableOpacity
+                style={styles.modalButton}
+                onPress={() => setModalVisibility(false)}
+              >
+                <Text style={styles.buttonText}>İptal</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -217,6 +231,49 @@ const FriendsScreen = ({ navigation }) => {
 export default FriendsScreen;
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#2E2E2E",
+  },
+  title: {
+    color: "#fff",
+    fontSize: 28,
+    fontWeight: "bold",
+    textAlign: "center",
+    marginVertical: 20,
+  },
+  friendUserContainer: {
+    width: "100%",
+    padding: 15,
+    backgroundColor: "#3D3D3D",
+    flexDirection: "row",
+    alignItems: "center",
+    marginVertical: 5,
+    borderRadius: 10,
+  },
+  friendUserImage: {
+    width: 50,
+    height: 50,
+    borderRadius: 50,
+    marginRight: 15,
+  },
+  friendUserName: {
+    color: "#fff",
+    fontSize: 16,
+    flex: 1,
+  },
+  addButton: {
+    backgroundColor: "#bb86fc",
+    padding: 15,
+    borderRadius: 5,
+    alignItems: "center",
+    marginVertical: 10,
+  },
+  addButtonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
   addFriendModalContainer: {
     flex: 1,
     justifyContent: "center",
@@ -225,55 +282,158 @@ const styles = StyleSheet.create({
   },
   addFriendModalContent: {
     width: 300,
-    padding: 20,
-    backgroundColor: "white",
+    padding: 10,
+    backgroundColor: "#1e1e1e",
     borderRadius: 10,
-    elevation: 5,
+    alignItems: "center",
+  },
+  modalTitle: {
+    color: "#fff",
+    fontSize: 20,
+    marginBottom: 10,
+  },
+  modalSubtitle: {
+    color: "#aaa",
+    textAlign: "center",
+    marginBottom: 20,
   },
   inputArea: {
-    borderWidth: 1,
-    borderColor: "gray",
-    width: 200,
-    backgroundColor: "white",
-    marginTop: 10,
-    padding: 5,
-    color: "black",
+    width: "100%",
+    backgroundColor: "#3D3D3D",
+    borderRadius: 5,
+    padding: 10,
+    color: "#fff",
+    marginBottom: 10,
   },
   emailError: {
     color: "red",
   },
+  modalButtonContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: 100,
+    gap: 80,
+    display: "flex",
+    alignSelf: "flex-start",
+  },
+  modalButton: {
+    backgroundColor: "#bb86fc",
+    padding: 10,
+    borderRadius: 5,
+    alignItems: "center",
+  },
+  buttonText: {
+    color: "#fff",
+    fontSize: 16,
+  },
   friendUserContainer: {
     width: "100%",
-    height: 50,
-    backgroundColor: "yellow",
-    padding: 10,
-    display: "flex",
+    padding: 15,
+    backgroundColor: "#3D3D3D",
     flexDirection: "row",
     alignItems: "center",
-    gap: 50,
     marginVertical: 5,
+    borderRadius: 10,
   },
   friendUserImage: {
     width: 50,
     height: 50,
     borderRadius: 50,
+    marginRight: 15,
   },
-  emptyContainer: {
+  friendUserName: {
+    color: "#fff",
+    fontSize: 16,
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
   },
   removeFriendModalContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "rgba(0,0,0,0.2)",
+    backgroundColor: "rgba(0,0,0,0.5)",
   },
   removeFriendModalContent: {
     width: 300,
     padding: 20,
-    backgroundColor: "white",
+    backgroundColor: "#1e1e1e",
     borderRadius: 10,
-    elevation: 5,
+    alignItems: "center",
+  },
+  modalText: {
+    color: "#fff",
+    marginBottom: 20,
+    textAlign: "center",
+  },
+  modalButton: {
+    backgroundColor: "#bb86fc",
+    padding: 10,
+    borderRadius: 5,
+    marginVertical: 5,
+    width: "100%",
+    alignItems: "center",
+  },
+  buttonText: {
+    color: "#fff",
+    fontSize: 16,
   },
 });
+
+// addFriendModalContainer: {
+//   flex: 1,
+//   justifyContent: "center",
+//   alignItems: "center",
+//   backgroundColor: "rgba(0,0,0,0.5)",
+// },
+// addFriendModalContent: {
+//   width: 300,
+//   padding: 20,
+//   backgroundColor: "white",
+//   borderRadius: 10,
+//   elevation: 5,
+// },
+// inputArea: {
+//   borderWidth: 1,
+//   borderColor: "gray",
+//   width: 200,
+//   backgroundColor: "white",
+//   marginTop: 10,
+//   padding: 5,
+//   color: "black",
+// },
+// emailError: {
+//   color: "red",
+// },
+// friendUserContainer: {
+//   width: "100%",
+//   height: 50,
+//   backgroundColor: "yellow",
+//   padding: 10,
+//   display: "flex",
+//   flexDirection: "row",
+//   alignItems: "center",
+//   gap: 50,
+//   marginVertical: 5,
+// },
+// friendUserImage: {
+//   width: 50,
+//   height: 50,
+//   borderRadius: 50,
+// },
+// emptyContainer: {
+//   flex: 1,
+//   justifyContent: "center",
+//   alignItems: "center",
+// },
+// removeFriendModalContainer: {
+//   flex: 1,
+//   justifyContent: "center",
+//   alignItems: "center",
+//   backgroundColor: "rgba(0,0,0,0.2)",
+// },
+// removeFriendModalContent: {
+//   width: 300,
+//   padding: 20,
+//   backgroundColor: "white",
+//   borderRadius: 10,
+//   elevation: 5,
+// },

@@ -8,19 +8,14 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-
 import { SafeAreaView } from "react-native-safe-area-context";
-
 import LoadingIndicator from "../Components/LoadingIndicator";
 import { getFriends } from "../services/firestore";
 
 const FriendsContainer = ({ friend, navigation }) => {
   if (!friend) return null;
-
   const profileImage = friend.profileImage || "https://via.placeholder.com/150";
-
   const handleFriendPress = () => {
-    console.log(friend);
     navigation.navigate("LiveChatRoom", { friend });
   };
 
@@ -30,7 +25,9 @@ const FriendsContainer = ({ friend, navigation }) => {
       onPress={handleFriendPress}
     >
       <Image source={{ uri: profileImage }} style={styles.friendUserImage} />
-      <Text>{friend.displayName || "Bilinmeyen Kullanıcı"}</Text>
+      <Text style={styles.friendUserName}>
+        {friend.displayName || "Bilinmeyen Kullanıcı"}
+      </Text>
     </TouchableOpacity>
   );
 };
@@ -40,31 +37,31 @@ const SingleChatScreen = ({ navigation }) => {
   const [friends, setFriends] = useState([]);
   const [filteredFriends, setFilteredFriends] = useState([]);
   const [searchText, setSearchText] = useState("");
+
   const fetchFriends = async () => {
     const friendsData = await getFriends();
     setFriends(friendsData);
     setFilteredFriends(friendsData);
     setIsLoading(false);
   };
+
   useEffect(() => {
     setIsLoading(true);
     fetchFriends();
     navigation.addListener("focus", () => {
       fetchFriends();
-      console.log(friends);
     });
   }, []);
 
   const renderEmptyComponent = () => (
     <View style={styles.emptyContainer}>
-      <Text>Buralarda hiç arkadaş gözükmüyor :/</Text>
-      <Text>Mesajlaşmak için arkadaş ekleyin</Text>
+      <Text style={styles.emptyText}>Buralarda hiç arkadaş gözükmüyor :/</Text>
+      <Text style={styles.emptyText}>Mesajlaşmak için arkadaş ekleyin</Text>
     </View>
   );
 
   const handleFilterFriends = (text) => {
     setSearchText(text);
-
     const filtered = friends.filter((friend) =>
       friend.displayName.toLowerCase().includes(text.toLowerCase())
     );
@@ -72,9 +69,9 @@ const SingleChatScreen = ({ navigation }) => {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, gap: 20 }}>
+    <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <Text>Birebir Sohbet</Text>
+        <Text style={styles.headerText}>Birebir Sohbet</Text>
       </View>
       <View style={styles.filterFriendContainer}>
         <TextInput
@@ -82,21 +79,16 @@ const SingleChatScreen = ({ navigation }) => {
           value={searchText}
           onChangeText={handleFilterFriends}
           placeholder="Arkadaş ara..."
+          placeholderTextColor="#aaa"
         />
       </View>
       <FlatList
         data={filteredFriends}
         renderItem={({ item }) => (
-          <FriendsContainer
-            friend={item}
-            setIsLoading={setIsLoading}
-            navigation={navigation}
-          />
+          <FriendsContainer friend={item} navigation={navigation} />
         )}
         keyExtractor={(item, index) => index.toString()}
         ListEmptyComponent={renderEmptyComponent}
-        scrollEnabled={true}
-        overScrollMode="always"
       />
       <LoadingIndicator visible={isLoading} />
     </SafeAreaView>
@@ -106,46 +98,60 @@ const SingleChatScreen = ({ navigation }) => {
 export default SingleChatScreen;
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#2E2E2E",
+  },
   header: {
     width: "100%",
     height: 60,
-    backgroundColor: "white",
-    marginBottom: 10,
-    flexDirection: "row",
-    justifyContent: "space-between",
+    backgroundColor: "#1e1e1e",
+    justifyContent: "center",
     alignItems: "center",
-    padding: 10,
+  },
+  headerText: {
+    color: "#fff",
+    fontSize: 20,
+    fontWeight: "bold",
   },
   friendUserContainer: {
     width: "100%",
-    height: 50,
-    backgroundColor: "yellow",
-    padding: 10,
-    display: "flex",
+    padding: 15,
+    backgroundColor: "#3D3D3D",
     flexDirection: "row",
     alignItems: "center",
-    gap: 50,
     marginVertical: 5,
+    borderRadius: 10,
   },
   friendUserImage: {
     width: 50,
     height: 50,
     borderRadius: 50,
+    marginRight: 15,
+  },
+  friendUserName: {
+    color: "#fff",
+    fontSize: 16,
   },
   emptyContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
   },
+  emptyText: {
+    color: "#aaa",
+    fontSize: 16,
+    textAlign: "center",
+    marginTop: 10,
+  },
   filterFriendContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
     padding: 10,
-    backgroundColor: "white",
+    backgroundColor: "#3D3D3D",
   },
   filterFriendInput: {
-    flex: 1,
+    backgroundColor: "#1e1e1e",
+    color: "#fff",
     padding: 10,
-    backgroundColor: "white",
+    borderRadius: 5,
   },
 });

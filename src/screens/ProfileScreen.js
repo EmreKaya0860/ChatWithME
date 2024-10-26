@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import {
   Alert,
   Modal,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -51,7 +52,9 @@ const ProfileScreen = ({ navigation }) => {
       setLoading(false);
       console.log(auth.currentUser.email);
     };
-
+    navigation.addListener("focus", () => {
+      fetchUserData();
+    });
     fetchUserData();
   }, []);
 
@@ -127,176 +130,196 @@ const ProfileScreen = ({ navigation }) => {
     auth.signOut();
   };
   return (
-    <SafeAreaView style={{ flex: 1, padding: 16 }}>
-      <Text style={styles.title}>Profil Bilgileri</Text>
-      <SetImage
-        docId={documentId}
-        profileImageURL={userData.profileImage}
-        navigation={navigation}
-      />
-      <View style={styles.editableInfoArea}>
-        <View style={styles.info}>
-          <View style={styles.currentInfo}>
-            <Text>Email: {userData.email}</Text>
-            {auth.currentUser.emailVerified ? (
-              <>
-                {isEditable === "email" ? (
-                  <TouchableOpacity onPress={() => setIsEditable("")}>
-                    <Text>İptal</Text>
+    <SafeAreaView style={styles.container}>
+      <ScrollView>
+        <Text style={styles.title}>Profil Bilgileri</Text>
+        <SetImage
+          docId={documentId}
+          profileImageURL={userData.profileImage}
+          navigation={navigation}
+        />
+        <View style={styles.editableInfoArea}>
+          <View style={styles.info}>
+            <View style={styles.currentInfo}>
+              <Text style={styles.infoText}>Email: {userData.email}</Text>
+              {auth.currentUser.emailVerified ? (
+                <>
+                  {isEditable === "email" ? (
+                    <TouchableOpacity onPress={() => setIsEditable("")}>
+                      <Text style={styles.cancelText}>İptal</Text>
+                    </TouchableOpacity>
+                  ) : (
+                    <TouchableOpacity onPress={() => setIsEditable("email")}>
+                      <Text style={styles.editText}>Değiştir</Text>
+                    </TouchableOpacity>
+                  )}
+                </>
+              ) : (
+                <View style={styles.verifyMailContainer}>
+                  <Text style={styles.verifyMailError}>
+                    Email onaylı değil!
+                  </Text>
+                  <TouchableOpacity onPress={() => handleEmailVerification()}>
+                    <Text style={styles.verifyText}>Onayla</Text>
                   </TouchableOpacity>
-                ) : (
-                  <TouchableOpacity onPress={() => setIsEditable("email")}>
-                    <Text>Değiştir</Text>
-                  </TouchableOpacity>
-                )}
-              </>
-            ) : (
-              <View style={styles.verifyMailContainer}>
-                <Text style={styles.verifyMailError}>Email onaylı değil!</Text>
-                <TouchableOpacity onPress={() => handleEmailVerification()}>
-                  <Text>Onayla</Text>
-                </TouchableOpacity>
-              </View>
-            )}
-          </View>
-          <View>
-            {isEditable === "email" ? (
+                </View>
+              )}
+            </View>
+            {isEditable === "email" && (
               <View style={styles.editInfoContainer}>
-                <Text>Yeni Email:</Text>
+                <Text style={styles.infoText}>Yeni Email:</Text>
                 <TextInput
                   value={userData.email}
                   onChangeText={(text) =>
                     setUserData({ ...userData, email: text })
                   }
                   style={styles.inputArea}
+                  placeholderTextColor="#aaa"
                 />
-                <TouchableOpacity onPress={() => handleUpdate()}>
-                  <Text>Kaydet</Text>
+                <TouchableOpacity
+                  onPress={() => handleUpdate()}
+                  style={styles.saveButton}
+                >
+                  <Text style={styles.saveText}>Kaydet</Text>
                 </TouchableOpacity>
               </View>
-            ) : null}
-          </View>
-        </View>
-        <View style={styles.info}>
-          <View style={styles.currentInfo}>
-            <Text>Ad Soyad: {userData.displayName}</Text>
-
-            {isEditable === "displayName" ? (
-              <TouchableOpacity onPress={() => setIsEditable("")}>
-                <Text>İptal</Text>
-              </TouchableOpacity>
-            ) : (
-              <TouchableOpacity onPress={() => setIsEditable("displayName")}>
-                <Text>Değiştir</Text>
-              </TouchableOpacity>
             )}
           </View>
-          <View>
-            {isEditable === "displayName" ? (
+          <View style={styles.info}>
+            <View style={styles.currentInfo}>
+              <Text style={styles.infoText}>
+                Ad Soyad: {userData.displayName}
+              </Text>
+              {isEditable === "displayName" ? (
+                <TouchableOpacity onPress={() => setIsEditable("")}>
+                  <Text style={styles.cancelText}>İptal</Text>
+                </TouchableOpacity>
+              ) : (
+                <TouchableOpacity onPress={() => setIsEditable("displayName")}>
+                  <Text style={styles.editText}>Değiştir</Text>
+                </TouchableOpacity>
+              )}
+            </View>
+            {isEditable === "displayName" && (
               <View style={styles.editInfoContainer}>
-                <Text>Yeni Ad Soyad:</Text>
+                <Text style={styles.infoText}>Yeni Ad Soyad:</Text>
                 <TextInput
                   value={userData.displayName}
                   onChangeText={(text) =>
                     setUserData({ ...userData, displayName: text })
                   }
                   style={styles.inputArea}
+                  placeholderTextColor="#aaa"
                 />
-                <TouchableOpacity onPress={() => handleUpdate()}>
-                  <Text>Kaydet</Text>
+                <TouchableOpacity
+                  onPress={() => handleUpdate()}
+                  style={styles.saveButton}
+                >
+                  <Text style={styles.saveText}>Kaydet</Text>
                 </TouchableOpacity>
               </View>
-            ) : null}
-          </View>
-        </View>
-        <View style={styles.info}>
-          <View style={styles.currentInfo}>
-            <Text>Şifreyi Değiştir: </Text>
-            {isEditable === "password" ? (
-              <TouchableOpacity onPress={() => setIsEditable("")}>
-                <Text>İptal</Text>
-              </TouchableOpacity>
-            ) : (
-              <TouchableOpacity onPress={() => setIsEditable("password")}>
-                <Text>Değiştir</Text>
-              </TouchableOpacity>
             )}
           </View>
-          <View>
-            {isEditable === "password" ? (
+          <View style={styles.info}>
+            <View style={styles.currentInfo}>
+              <Text style={styles.infoText}>Şifreyi Değiştir:</Text>
+              {isEditable === "password" ? (
+                <TouchableOpacity onPress={() => setIsEditable("")}>
+                  <Text style={styles.cancelText}>İptal</Text>
+                </TouchableOpacity>
+              ) : (
+                <TouchableOpacity onPress={() => setIsEditable("password")}>
+                  <Text style={styles.editText}>Değiştir</Text>
+                </TouchableOpacity>
+              )}
+            </View>
+            {isEditable === "password" && (
               <View style={styles.editPasswordInfoContainer}>
-                <Text>Eski Şifre:</Text>
+                <Text style={styles.infoText}>Eski Şifre:</Text>
                 <TextInput
                   onChangeText={(text) => setEnteredOldPassword(text)}
                   style={styles.inputArea}
                   secureTextEntry
+                  placeholderTextColor="#aaa"
                 />
-                <Text>Yeni Şifre:</Text>
+                <Text style={styles.infoText}>Yeni Şifre:</Text>
                 <TextInput
                   onChangeText={(text) =>
                     setUserData({ ...userData, password: text })
                   }
                   style={styles.inputArea}
                   secureTextEntry
+                  placeholderTextColor="#aaa"
                 />
-                <TouchableOpacity onPress={() => handleUpdate()}>
-                  <Text>Kaydet</Text>
+                <TouchableOpacity
+                  onPress={() => handleUpdate()}
+                  style={styles.saveButton}
+                >
+                  <Text style={styles.saveText}>Kaydet</Text>
                 </TouchableOpacity>
               </View>
-            ) : null}
+            )}
           </View>
         </View>
-      </View>
-      <View style={styles.profileDateContainer}>
-        <Text>Profil Oluşturma Tarihi: {userData.createdAt}</Text>
-        <Text>Profil Güncelleme Tarihi: {userData.updatedAt}</Text>
-        <TouchableOpacity
-          onPress={() =>
-            setDeleteAccountModalVisibility(!deleteAccountModalVisibility)
-          }
-        >
-          <Text>Hesabı Sil</Text>
+        <View style={styles.profileDateContainer}>
+          <Text style={styles.infoText}>
+            Profil Oluşturma Tarihi: {userData.createdAt}
+          </Text>
+          <Text style={styles.infoText}>
+            Profil Güncelleme Tarihi: {userData.updatedAt}
+          </Text>
+          <TouchableOpacity
+            onPress={() =>
+              setDeleteAccountModalVisibility(!deleteAccountModalVisibility)
+            }
+            style={styles.deleteButton}
+          >
+            <Text style={styles.deleteButtonText}>Hesabı Sil</Text>
+          </TouchableOpacity>
+        </View>
+        <TouchableOpacity onPress={handleSignOut} style={styles.signOutButton}>
+          <Text style={styles.signOutButtonText}>Sign Out</Text>
         </TouchableOpacity>
-      </View>
-
-      <TouchableOpacity onPress={handleSignOut} style={styles.signOutButton}>
-        <Text>Sign Out</Text>
-      </TouchableOpacity>
-      <Modal
-        transparent={true}
-        animationType="fade"
-        visible={deleteAccountModalVisibility}
-      >
-        <View style={styles.deleteAccountModalContainer}>
-          <View style={styles.deleteAccountModalContent}>
-            <Text>Hesabınızı silmek istediğinize emin misiniz?</Text>
-            <Text style={styles.importantNoteText}>
-              Not: Hesabınızı sildiğinizde geri dönüşü olmayacaktır!
-            </Text>
-            <View style={styles.deleteAccountModalButtons}>
-              <TouchableOpacity
-                style={styles.deleteAccountModalAcceptButton}
-                onPress={handleDeleteAccount}
-              >
-                <Text style={styles.deleteAccountModalButtonsTextColor}>
-                  Evet
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.deleteAccountModalRejectButton}
-                onPress={() =>
-                  setDeleteAccountModalVisibility(!deleteAccountModalVisibility)
-                }
-              >
-                <Text style={styles.deleteAccountModalButtonsTextColor}>
-                  Hayır
-                </Text>
-              </TouchableOpacity>
+        <Modal
+          transparent={true}
+          animationType="fade"
+          visible={deleteAccountModalVisibility}
+        >
+          <View style={styles.deleteAccountModalContainer}>
+            <View style={styles.deleteAccountModalContent}>
+              <Text style={styles.modalText}>
+                Hesabınızı silmek istediğinize emin misiniz?
+              </Text>
+              <Text style={styles.importantNoteText}>
+                Not: Hesabınızı sildiğinizde geri dönüşü olmayacaktır!
+              </Text>
+              <View style={styles.deleteAccountModalButtons}>
+                <TouchableOpacity
+                  style={styles.deleteAccountModalAcceptButton}
+                  onPress={handleDeleteAccount}
+                >
+                  <Text style={styles.deleteAccountModalButtonsTextColor}>
+                    Evet
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.deleteAccountModalRejectButton}
+                  onPress={() =>
+                    setDeleteAccountModalVisibility(
+                      !deleteAccountModalVisibility
+                    )
+                  }
+                >
+                  <Text style={styles.deleteAccountModalButtonsTextColor}>
+                    Hayır
+                  </Text>
+                </TouchableOpacity>
+              </View>
             </View>
           </View>
-        </View>
-      </Modal>
-      {loading && <LoadingIndicator visible={loading} />}
+        </Modal>
+        {loading && <LoadingIndicator visible={loading} />}
+      </ScrollView>
     </SafeAreaView>
   );
 };
@@ -304,112 +327,180 @@ const ProfileScreen = ({ navigation }) => {
 export default ProfileScreen;
 
 const styles = StyleSheet.create({
-  editableInfoArea: {
-    height: 500,
-  },
-  profileDateContainer: {
+  container: {
     flex: 1,
+    backgroundColor: "#2E2E2E",
+    padding: 16,
   },
   title: {
-    fontSize: 20,
+    color: "#fff",
+    fontSize: 28,
     fontWeight: "bold",
+    textAlign: "center",
+    marginBottom: 20,
+  },
+  editableInfoArea: {
+    backgroundColor: "#3D3D3D",
+    padding: 10,
+    borderRadius: 10,
     marginBottom: 20,
   },
   info: {
-    display: "flex",
-    justifyContent: "space-around",
-    height: 50,
-    gap: 10,
-    backgroundColor: "yellow",
-    height: 100,
+    marginVertical: 10,
   },
   currentInfo: {
-    display: "flex",
-    flexDirection: "row",
-    justifyContent: "space-between",
-  },
-  editInfoContainer: {
-    display: "flex",
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-  },
-  editPasswordInfoContainer: {
-    display: "flex",
-    flexDirection: "column",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  inputArea: {
-    borderWidth: 1,
-    borderColor: "gray",
-    width: 200,
-    backgroundColor: "white",
-    marginTop: 10,
-    padding: 5,
-    color: "black",
-  },
-  verifyMailError: {
-    color: "red",
-    display: "flex",
-    flexWrap: "wrap",
+    marginBottom: 5,
   },
   verifyMailContainer: {
-    display: "flex",
-    backgroundColor: "yellow",
-    width: 150,
-    gap: 5,
     alignItems: "center",
+    gap: 10,
+  },
+  verifyMailError: {
+    color: "#ff5252", // Red color for error
+    marginRight: 10,
+  },
+  editInfoContainer: {
+    backgroundColor: "#1e1e1e",
+    borderRadius: 5,
+    padding: 10,
+    marginBottom: 10,
+  },
+  inputArea: {
+    backgroundColor: "#3D3D3D",
+    borderRadius: 5,
+    padding: 10,
+    color: "#fff",
+    marginBottom: 10,
+  },
+  editPasswordInfoContainer: {
+    backgroundColor: "#1e1e1e",
+    borderRadius: 5,
+    padding: 10,
+    marginBottom: 10,
+  },
+  profileDateContainer: {
+    marginTop: 20,
+  },
+  profileDateText: {
+    color: "#aaa",
+    marginBottom: 5,
   },
   signOutButton: {
-    backgroundColor: "red",
-    padding: 10,
-    borderRadius: 10,
+    backgroundColor: "#bb86fc",
+    padding: 15,
+    borderRadius: 5,
     alignItems: "center",
-    justifyContent: "center",
-    color: "white",
+    marginVertical: 10,
+  },
+  signOutButtonText: {
+    color: "#fff",
+    fontSize: 16,
+  },
+  deleteAccountButton: {
+    backgroundColor: "#ff5252", // Red color for delete account button
+    padding: 15,
+    borderRadius: 5,
+    alignItems: "center",
+    marginVertical: 10,
+  },
+  deleteAccountButtonText: {
+    color: "#fff",
+    fontSize: 16,
   },
   deleteAccountModalContainer: {
-    backgroundColor: "rgba(0, 0, 0, 0.2)",
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
   },
   deleteAccountModalContent: {
-    backgroundColor: "white",
-    width: "80%",
-    height: "25%",
-    borderRadius: 10,
+    width: 300,
     padding: 20,
-    gap: 20,
+    backgroundColor: "#1e1e1e",
+    borderRadius: 10,
+    alignItems: "center",
   },
   importantNoteText: {
-    color: "red",
-    fontWeight: "bold",
-    fontSize: 16,
+    color: "#ff5252", // Red color for important note
+    marginVertical: 10,
+    textAlign: "center",
   },
   deleteAccountModalButtons: {
-    display: "flex",
     flexDirection: "row",
-    justifyContent: "space-around",
+    justifyContent: "space-between",
+    width: "100%",
   },
   deleteAccountModalAcceptButton: {
-    backgroundColor: "red",
-    width: 100,
-    alignItems: "center",
+    backgroundColor: "#bb86fc",
     padding: 10,
-    borderRadius: 10,
+    borderRadius: 5,
+    marginRight: 10,
   },
   deleteAccountModalRejectButton: {
-    backgroundColor: "green",
-    width: 100,
-    alignItems: "center",
+    backgroundColor: "red",
     padding: 10,
-    borderRadius: 10,
+    borderRadius: 5,
   },
   deleteAccountModalButtonsTextColor: {
-    color: "white",
-    fontWeight: "bold",
+    color: "#fff",
     fontSize: 16,
+    textAlign: "center",
+  },
+  infoText: {
+    color: "#fff",
+    fontSize: 16,
+    marginBottom: 10,
+  },
+  cancelText: {
+    color: "#ff5252", // Red color for cancel text
+    fontSize: 16,
+  },
+  editText: {
+    color: "#bb86fc",
+    fontSize: 16,
+  },
+  verifyMailError: {
+    color: "#ff5252", // Red color for error
+    fontSize: 16,
+  },
+  verifyText: {
+    color: "#bb86fc",
+    fontSize: 16,
+  },
+  saveText: {
+    color: "#fff",
+    fontSize: 16,
+  },
+  deleteButtonText: {
+    color: "#fff",
+    fontSize: 16,
+  },
+  signOutButtonText: {
+    color: "#fff",
+    fontSize: 16,
+  },
+  modalText: {
+    color: "#fff",
+    fontSize: 16,
+  },
+  importantNoteText: {
+    color: "#ff5252", // Red color for important note
+    fontSize: 16,
+    textAlign: "center",
+  },
+  deleteAccountModalButtonsTextColor: {
+    color: "#fff",
+    fontSize: 16,
+    textAlign: "center",
+  },
+  deleteButton: {
+    backgroundColor: "#ff5252", // Kırmızı renk
+    padding: 15,
+    borderRadius: 5,
+    alignItems: "center",
+    marginVertical: 10,
   },
 });

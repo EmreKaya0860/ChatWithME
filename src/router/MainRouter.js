@@ -2,6 +2,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import React, { useEffect, useState } from "react";
 import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
 
+import FriendRequestsScreen from "../screens/FriendRequestsScreen";
 import GroupLiveChatRoom from "../screens/GroupLiveChatRoom";
 import LiveChatRoom from "../screens/LiveChatRoom";
 import LoginScreen from "../screens/LoginScreen";
@@ -52,6 +53,10 @@ const MainRouter = () => {
           <Stack.Screen
             name="GroupLiveChatRoom"
             component={GroupLiveChatRoom}
+          />
+          <Stack.Screen
+            name="FriendRequestsScreen"
+            component={FriendRequestsScreen}
           />
         </>
       ) : (

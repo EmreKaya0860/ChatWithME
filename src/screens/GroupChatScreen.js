@@ -14,7 +14,6 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import LoadingIndicator from "../Components/LoadingIndicator";
 import { getFriends } from "../services/firestore";
-
 import { createGroupChat, getJoinedGroups } from "../services/livechat";
 
 const FriendsContainer = ({
@@ -25,18 +24,19 @@ const FriendsContainer = ({
 }) => {
   if (!friend) return null;
   const profileImage = friend.profileImage || "https://via.placeholder.com/150";
-
   return (
     <View style={styles.friendUserContainer}>
       <Image source={{ uri: profileImage }} style={styles.friendUserImage} />
-      <Text>{friend.displayName || "Bilinmeyen Kullanıcı"}</Text>
+      <Text style={styles.friendUserName}>
+        {friend.displayName || "Bilinmeyen Kullanıcı"}
+      </Text>
       {!isSelected ? (
         <TouchableOpacity onPress={() => handleAddFriend(friend)}>
-          <Text>Ekle</Text>
+          <Text style={styles.addRemoveText}>Ekle</Text>
         </TouchableOpacity>
       ) : (
         <TouchableOpacity onPress={() => handleRemoveFriend(friend)}>
-          <Text>Çıkar</Text>
+          <Text style={styles.addRemoveText}>Çıkar</Text>
         </TouchableOpacity>
       )}
     </View>
@@ -46,7 +46,6 @@ const FriendsContainer = ({
 const GroupsContainer = ({ group, navigation, friends }) => {
   if (!group) return null;
   const handleGroupPress = () => {
-    console.log(group);
     navigation.navigate("GroupLiveChatRoom", { group, friends });
   };
   return (
@@ -54,8 +53,10 @@ const GroupsContainer = ({ group, navigation, friends }) => {
       style={styles.friendUserContainer}
       onPress={handleGroupPress}
     >
-      <MaterialIcons name="groups" size={35} color="black" />
-      <Text>{group.groupName || "Bilinmeyen Grup"}</Text>
+      <MaterialIcons name="groups" size={35} color="#bb86fc" />
+      <Text style={styles.friendUserName}>
+        {group.groupName || "Bilinmeyen Grup"}
+      </Text>
     </TouchableOpacity>
   );
 };
@@ -100,7 +101,7 @@ const GroupChatScreen = ({ navigation }) => {
 
   const renderEmptyComponent = () => (
     <View style={styles.emptyContainer}>
-      <Text>Buralar boş gözüküyor :/</Text>
+      <Text style={styles.emptyText}>Buralar boş gözüküyor :/</Text>
     </View>
   );
 
@@ -132,7 +133,6 @@ const GroupChatScreen = ({ navigation }) => {
 
   const handleCreateGroup = async () => {
     setIsLoading(true);
-    console.log(groupName, groupMembers);
     await createGroupChat(groupName, groupMembers);
     setIsCreateGroupModalVisible(!isCreateGroupModalVisible);
     setGroupName("");
@@ -141,18 +141,16 @@ const GroupChatScreen = ({ navigation }) => {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, gap: 20 }}>
+    <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <Text>Grup Sohbet</Text>
+        <Text style={styles.headerText}>Grup Sohbet</Text>
       </View>
       <TouchableOpacity
         style={styles.createGroupButton}
-        onPress={() => {
-          setIsCreateGroupModalVisible(!isCreateGroupModalVisible);
-        }}
+        onPress={() => setIsCreateGroupModalVisible(!isCreateGroupModalVisible)}
       >
-        <Octicons name="diff-added" size={30} color="black" />
-        <Text>Yeni{"\n"}Grup Oluştur</Text>
+        <Octicons name="diff-added" size={30} color="#bb86fc" />
+        <Text style={styles.createGroupText}>Yeni{"\n"}Grup Oluştur</Text>
       </TouchableOpacity>
       <View style={styles.filterFriendContainer}>
         <TextInput
@@ -160,6 +158,7 @@ const GroupChatScreen = ({ navigation }) => {
           value={groupSearchText}
           onChangeText={handleFilterGroups}
           placeholder="Grup ara..."
+          placeholderTextColor="#aaa"
         />
       </View>
       {filteredJoinedGroups.length > 0 ? (
@@ -183,17 +182,20 @@ const GroupChatScreen = ({ navigation }) => {
       <Modal transparent={true} visible={isCreateGroupModalVisible}>
         <View style={styles.createGroupModalContainer}>
           <View style={styles.createGroupModalContent}>
-            <Text>Grup Oluştur</Text>
+            <Text style={styles.modalTitle}>Grup Oluştur</Text>
             <TextInput
               placeholder="Grup Adı"
+              style={styles.modalInput}
               onChangeText={(text) => setGroupName(text)}
+              placeholderTextColor="#aaa"
             />
-            <Text>Üyeler</Text>
+            <Text style={styles.modalTitle}>Üyeler</Text>
             <TextInput
-              style={styles.filterFriendInput}
+              style={styles.modalInput}
               value={friendSearchText}
               onChangeText={handleFilterFriends}
               placeholder="Arkadaş ara..."
+              placeholderTextColor="#aaa"
             />
             {filteredFriends.length > 0
               ? filteredFriends.map((friend) => (
@@ -208,15 +210,19 @@ const GroupChatScreen = ({ navigation }) => {
                   />
                 ))
               : renderEmptyComponent()}
-            <TouchableOpacity onPress={handleCreateGroup}>
-              <Text>Oluştur</Text>
+            <TouchableOpacity
+              style={styles.modalButton}
+              onPress={handleCreateGroup}
+            >
+              <Text style={styles.buttonText}>Oluştur</Text>
             </TouchableOpacity>
             <TouchableOpacity
+              style={styles.modalButton}
               onPress={() =>
                 setIsCreateGroupModalVisible(!isCreateGroupModalVisible)
               }
             >
-              <Text>Vazgeç</Text>
+              <Text style={styles.buttonText}>Vazgeç</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -229,70 +235,113 @@ const GroupChatScreen = ({ navigation }) => {
 export default GroupChatScreen;
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#2E2E2E",
+  },
   header: {
     width: "100%",
     height: 60,
-    backgroundColor: "white",
-    marginBottom: 10,
-    flexDirection: "row",
-    justifyContent: "space-between",
+    backgroundColor: "#1e1e1e",
+    justifyContent: "center",
     alignItems: "center",
-    padding: 10,
+  },
+  headerText: {
+    color: "#fff",
+    fontSize: 20,
+    fontWeight: "bold",
   },
   friendUserContainer: {
     width: "100%",
-    height: 50,
-    backgroundColor: "yellow",
-    padding: 10,
-    display: "flex",
+    padding: 15,
+    backgroundColor: "#3D3D3D",
     flexDirection: "row",
     alignItems: "center",
-    gap: 50,
     marginVertical: 5,
+    borderRadius: 10,
+    gap: 10,
   },
   friendUserImage: {
     width: 50,
     height: 50,
     borderRadius: 50,
+    marginRight: 15,
+  },
+  friendUserName: {
+    color: "#fff",
+    fontSize: 16,
+    flex: 1,
+  },
+  addRemoveText: {
+    color: "#bb86fc",
+    fontWeight: "bold",
   },
   emptyContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
   },
+  emptyText: {
+    color: "#aaa",
+    fontSize: 16,
+    textAlign: "center",
+  },
   filterFriendContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
     padding: 10,
-    backgroundColor: "white",
+    backgroundColor: "#3D3D3D",
   },
   filterFriendInput: {
-    flex: 1,
+    backgroundColor: "#1e1e1e",
+    color: "#fff",
     padding: 10,
-    backgroundColor: "white",
+    borderRadius: 5,
   },
   createGroupButton: {
     alignItems: "center",
-    right: 0,
-    bottom: 0,
-    width: 120,
-    height: 40,
-    justifyContent: "space-between",
-    alignItems: "center",
     flexDirection: "row",
     marginHorizontal: 10,
+  },
+  createGroupText: {
+    color: "#bb86fc",
+    marginLeft: 10,
   },
   createGroupModalContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
   },
   createGroupModalContent: {
     width: "80%",
-    height: "80%",
-    backgroundColor: "white",
+    backgroundColor: "#1e1e1e",
     borderRadius: 10,
-    padding: 10,
+    padding: 20,
     alignItems: "center",
+  },
+  modalTitle: {
+    color: "#fff",
+    fontSize: 20,
+    marginBottom: 10,
+  },
+  modalInput: {
+    backgroundColor: "#3D3D3D",
+    color: "#fff",
+    padding: 10,
+    borderRadius: 5,
+    marginBottom: 10,
+    width: "100%",
+  },
+  modalButton: {
+    backgroundColor: "#bb86fc",
+    padding: 15,
+    borderRadius: 5,
+    alignItems: "center",
+    marginBottom: 10,
+    width: "100%",
+  },
+  buttonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
   },
 });
