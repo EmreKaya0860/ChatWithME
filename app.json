@@ -3,7 +3,7 @@
     "name": "chatwithme",
     "slug": "chatwithme",
     "version": "1.0.0",
-    "orientation": "portrait",
+    "orientation": "default",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "plugins": [
@@ -12,7 +12,8 @@
         {
           "photosPermission": "The app accesses your photos to let you share them with your friends."
         }
-      ]
+      ],
+      ["expo-document-picker"]
     ],
     "splash": {
       "image": "./assets/splash.png",

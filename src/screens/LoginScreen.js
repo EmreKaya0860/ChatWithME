@@ -8,11 +8,9 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { handleLogin, handlePasswordReset } from "../services/authentication";
-
 import { SafeAreaView } from "react-native-safe-area-context";
-
 import LoadingIndicator from "../Components/LoadingIndicator";
+import { handleLogin, handlePasswordReset } from "../services/authentication";
 
 const LoginScreen = ({ navigation }) => {
   const [email, setEmail] = useState("");
@@ -25,7 +23,6 @@ const LoginScreen = ({ navigation }) => {
   const loginAndNavigate = async () => {
     setIsLoading(true);
     const loginResult = await handleLogin(email, password);
-
     if (loginResult === "Login success") {
       navigation.navigate("SingleChatScreen");
     } else {
@@ -48,34 +45,43 @@ const LoginScreen = ({ navigation }) => {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
-      <Text>LoginScreen</Text>
-      <Text>Email</Text>
-      <TextInput
-        placeholder="Email"
-        onChangeText={(email) => setEmail(email)}
-        inputMode="email"
-      />
-      <Text>Şifre</Text>
-      <TextInput
-        placeholder="Şifre"
-        onChangeText={(password) => setPassword(password)}
-        secureTextEntry
-      />
-      <Text style={styles.wrongError}>{wrongError}</Text>
-      <TouchableOpacity onPress={loginAndNavigate}>
-        <Text>Login</Text>
-      </TouchableOpacity>
-      <TouchableOpacity onPress={handleNavigation}>
-        <Text>Do not have account? Register</Text>
-      </TouchableOpacity>
-      <TouchableOpacity
-        onPress={() =>
-          setPasswordResetModalVisibility(!passwordResetModalVisibility)
-        }
-      >
-        <Text>Forgot the password? Send Reset Email!</Text>
-      </TouchableOpacity>
+    <SafeAreaView style={styles.container}>
+      <View style={styles.innerContainer}>
+        <Text style={styles.title}>Login</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Email"
+          placeholderTextColor="#aaa"
+          onChangeText={(email) => setEmail(email)}
+          inputMode="email"
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Password"
+          placeholderTextColor="#aaa"
+          onChangeText={(password) => setPassword(password)}
+          secureTextEntry
+        />
+        {wrongError ? (
+          <Text style={styles.wrongError}>{wrongError}</Text>
+        ) : null}
+        <TouchableOpacity style={styles.button} onPress={loginAndNavigate}>
+          <Text style={styles.buttonText}>Login</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={handleNavigation}>
+          <Text style={styles.linkText}>Don't have an account? Register</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() =>
+            setPasswordResetModalVisibility(!passwordResetModalVisibility)
+          }
+        >
+          <Text style={styles.linkText}>
+            Forgot the password? Send Reset Email!
+          </Text>
+        </TouchableOpacity>
+      </View>
+
       <Modal
         transparent={true}
         visible={passwordResetModalVisibility}
@@ -83,27 +89,35 @@ const LoginScreen = ({ navigation }) => {
       >
         <View style={styles.resetPasswordContainer}>
           <View style={styles.resetPasswordContent}>
-            <Text>Şifrenizi sıfırlamak için email adresinizi giriniz.</Text>
-            <Text>
-              Not: Şifre sıfırlama epostası almanız için mail adresinizi
-              doğrulamanız gerekmektedir!
+            <Text style={styles.resetPasswordText}>
+              Enter your email to reset your password.
+            </Text>
+            <Text style={styles.resetPasswordNote}>
+              Note: You need to verify your email address to receive a password
+              reset email!
             </Text>
             <TextInput
+              style={styles.input}
               placeholder="Email"
+              placeholderTextColor="#aaa"
               onChangeText={(email) => setEmail(email)}
               inputMode="email"
             />
-            <TouchableOpacity onPress={handlePasswordResetButton}>
-              <Text>Şifre Sıfırla</Text>
+            <TouchableOpacity
+              style={styles.button}
+              onPress={handlePasswordResetButton}
+            >
+              <Text style={styles.buttonText}>Reset Password</Text>
             </TouchableOpacity>
             <TouchableOpacity
               onPress={() => setPasswordResetModalVisibility(false)}
             >
-              <Text>Kapat</Text>
+              <Text style={styles.linkText}>Close</Text>
             </TouchableOpacity>
           </View>
         </View>
       </Modal>
+
       {isLoading ? <LoadingIndicator visible={isLoading} /> : null}
     </SafeAreaView>
   );
@@ -112,25 +126,72 @@ const LoginScreen = ({ navigation }) => {
 export default LoginScreen;
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#2E2E2E", // Daha açık bir gri ton
+    justifyContent: "center",
+  },
+  innerContainer: {
+    paddingHorizontal: 20,
+  },
+  title: {
+    color: "#fff",
+    fontSize: 28,
+    fontWeight: "bold",
+    marginBottom: 20,
+    textAlign: "center",
+  },
+  input: {
+    backgroundColor: "#3D3D3D", // Daha açık bir gri ton
+    color: "#fff",
+    padding: 10,
+    borderRadius: 5,
+    marginBottom: 10,
+  },
   wrongError: {
     color: "red",
+    marginBottom: 10,
   },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
+  button: {
+    backgroundColor: "#bb86fc",
+    padding: 15,
+    borderRadius: 5,
     alignItems: "center",
+    marginBottom: 10,
+  },
+  buttonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  linkText: {
+    color: "#bb86fc",
+    textAlign: "center",
+    marginTop: 10,
   },
   resetPasswordContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "rgba(0,0,0,0.2)",
+    backgroundColor: "rgba(0,0,0,0.5)",
   },
   resetPasswordContent: {
     width: 300,
     padding: 20,
-    backgroundColor: "white",
+    backgroundColor: "#3D3D3D", // Daha açık bir gri ton
     borderRadius: 10,
     elevation: 5,
+  },
+  resetPasswordText: {
+    color: "#fff",
+    fontSize: 16,
+    marginBottom: 10,
+    textAlign: "center",
+  },
+  resetPasswordNote: {
+    color: "#aaa",
+    fontSize: 12,
+    marginBottom: 20,
+    textAlign: "center",
   },
 });

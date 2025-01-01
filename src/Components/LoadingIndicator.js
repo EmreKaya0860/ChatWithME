@@ -1,5 +1,5 @@
 import React from "react";
-import { StyleSheet, View, ActivityIndicator, Modal } from "react-native";
+import { ActivityIndicator, Modal, StyleSheet, View } from "react-native";
 
 const LoadingIndicator = ({ visible }) => {
   return (
@@ -10,7 +10,7 @@ const LoadingIndicator = ({ visible }) => {
       onRequestClose={() => {}}
     >
       <View style={styles.container}>
-        <ActivityIndicator size="large" color="dodgerblue" />
+        <ActivityIndicator size="large" color="#bb86fc" />
       </View>
     </Modal>
   );
@@ -23,6 +23,6 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.2)",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
   },
 });
