@@ -11,19 +11,11 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { auth } from "../services/authentication";
 import { getSingleChatMessages, sendMessage } from "../services/livechat";
 
 import { uploadChatFile } from "../services/storage";
 
-const formatSendTime = (sendTime) => {
-  const messageDate = sendTime.toDate();
-  return messageDate.toLocaleTimeString([], {
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-  });
-};
+import RenderMessage from "../Components/LiveChatRoom/RenderMessage";
 
 const LiveChatRoom = ({ route, navigation }) => {
   const [message, setMessage] = useState("");
@@ -31,9 +23,8 @@ const LiveChatRoom = ({ route, navigation }) => {
   const [selectedFile, setSelectedFile] = useState(null);
   const flatListRef = useRef(null);
   const { friend } = route.params;
-  const profileImage =
-    friend.profileImage ||
-    "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png";
+  const defaultImageUrl = process.env.EXPO_PUBLIC_DEFAULT_FRIEND_IMAGE_URL;
+  const profileImage = friend.profileImage || defaultImageUrl;
 
   const sendMessages = async () => {
     if (selectedFile) {
@@ -76,25 +67,6 @@ const LiveChatRoom = ({ route, navigation }) => {
     }
   };
 
-  const renderMessage = ({ item }) => {
-    const isMyMessage = item.senderId === auth.currentUser.uid;
-
-    return (
-      <View
-        style={[
-          styles.messageContainer,
-          isMyMessage ? styles.myMessage : styles.friendMessage,
-        ]}
-      >
-        <Text style={styles.senderName}>
-          {isMyMessage ? "Ben" : friend.displayName}
-        </Text>
-        <Text style={styles.messageText}>{item.text}</Text>
-        <Text style={styles.messageTime}>{formatSendTime(item.sendTime)}</Text>
-      </View>
-    );
-  };
-
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.headerContainer}>
@@ -109,7 +81,7 @@ const LiveChatRoom = ({ route, navigation }) => {
       <FlatList
         ref={flatListRef}
         data={oldMessages}
-        renderItem={renderMessage}
+        renderItem={({ item }) => <RenderMessage item={item} friend={friend} />}
         keyExtractor={(item, index) => index.toString()}
         contentContainerStyle={styles.messagesContainer}
         onContentSizeChange={() =>
@@ -142,7 +114,7 @@ const LiveChatRoom = ({ route, navigation }) => {
 
 export default LiveChatRoom;
 
-const styles = StyleSheet.create({
+export const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#2E2E2E",
@@ -170,7 +142,7 @@ const styles = StyleSheet.create({
     paddingVertical: 5,
     flexGrow: 1,
     justifyContent: "flex-end",
-  },
+  }, //
   messageContainer: {
     maxWidth: "70%",
     borderRadius: 10,
@@ -199,7 +171,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: "#bbb",
     alignSelf: "flex-end",
-  },
+  }, //
   inputContainer: {
     flexDirection: "row",
     alignItems: "center",

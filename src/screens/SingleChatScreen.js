@@ -1,36 +1,11 @@
 import React, { useEffect, useState } from "react";
-import {
-  FlatList,
-  Image,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { FlatList, StyleSheet, Text, TextInput, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import LoadingIndicator from "../Components/LoadingIndicator";
 import { getFriends } from "../services/firestore";
 
-const FriendsContainer = ({ friend, navigation }) => {
-  if (!friend) return null;
-  const profileImage = friend.profileImage || "https://via.placeholder.com/150";
-  const handleFriendPress = () => {
-    navigation.navigate("LiveChatRoom", { friend });
-  };
-
-  return (
-    <TouchableOpacity
-      style={styles.friendUserContainer}
-      onPress={handleFriendPress}
-    >
-      <Image source={{ uri: profileImage }} style={styles.friendUserImage} />
-      <Text style={styles.friendUserName}>
-        {friend.displayName || "Bilinmeyen Kullanıcı"}
-      </Text>
-    </TouchableOpacity>
-  );
-};
+import FriendListContainer from "../Components/SingleChatScreen/FriendListContainer";
+import FriendListEmptyComponent from "../Components/SingleChatScreen/FriendListEmptyComponent";
 
 const SingleChatScreen = ({ navigation }) => {
   const [isLoading, setIsLoading] = useState(false);
@@ -52,13 +27,6 @@ const SingleChatScreen = ({ navigation }) => {
       fetchFriends();
     });
   }, []);
-
-  const renderEmptyComponent = () => (
-    <View style={styles.emptyContainer}>
-      <Text style={styles.emptyText}>Buralarda hiç arkadaş gözükmüyor :/</Text>
-      <Text style={styles.emptyText}>Mesajlaşmak için arkadaş ekleyin</Text>
-    </View>
-  );
 
   const handleFilterFriends = (text) => {
     setSearchText(text);
@@ -85,10 +53,10 @@ const SingleChatScreen = ({ navigation }) => {
       <FlatList
         data={filteredFriends}
         renderItem={({ item }) => (
-          <FriendsContainer friend={item} navigation={navigation} />
+          <FriendListContainer friend={item} navigation={navigation} />
         )}
         keyExtractor={(item, index) => index.toString()}
-        ListEmptyComponent={renderEmptyComponent}
+        ListEmptyComponent={FriendListEmptyComponent}
       />
       <LoadingIndicator visible={isLoading} />
     </SafeAreaView>
@@ -113,36 +81,6 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 20,
     fontWeight: "bold",
-  },
-  friendUserContainer: {
-    width: "100%",
-    padding: 15,
-    backgroundColor: "#3D3D3D",
-    flexDirection: "row",
-    alignItems: "center",
-    marginVertical: 5,
-    borderRadius: 10,
-  },
-  friendUserImage: {
-    width: 50,
-    height: 50,
-    borderRadius: 50,
-    marginRight: 15,
-  },
-  friendUserName: {
-    color: "#fff",
-    fontSize: 16,
-  },
-  emptyContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  emptyText: {
-    color: "#aaa",
-    fontSize: 16,
-    textAlign: "center",
-    marginTop: 10,
   },
   filterFriendContainer: {
     padding: 10,
